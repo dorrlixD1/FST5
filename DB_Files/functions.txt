@@ -31,6 +31,8 @@ WHEN NO_DATA_FOUND THEN
 	RAISE_APPLICATION_ERROR(-20050,'Keine Daten gefunden');
 
 WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_nextID_n', sysdate, 'f_nextID_n() ERROR');
+	COMMIT;
 	RAISE_APPLICATION_ERROR(-20051,'f_nextID_n() ERROR');
 
 END;
@@ -69,6 +71,8 @@ BEGIN
 EXCEPTION
 
 WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_checkBoolean_n', sysdate, 'f_checkBoolean_n() ERROR');
+	COMMIT;
 	RAISE_APPLICATION_ERROR(-20051,'f_checkBoolean_n() ERROR');
 
 END;
@@ -109,8 +113,12 @@ BEGIN
 	END IF;
 	
 EXCEPTION
-
+WHEN NO_DATA_FOUND THEN
+	RAISE_APPLICATION_ERROR(-20050,'Keine Daten gefunden');
+	
 WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Check_Existing_Rec', sysdate, 'f_Check_Existing_Rec() ERROR');
+	COMMIT;
 	RAISE_APPLICATION_ERROR(-20051,'f_Check_Existing_Rec() ERROR');
 		 	
 END;
@@ -159,8 +167,10 @@ BEGIN
 
 EXCEPTION
 
-WHEN OTHERS THEN
-	RAISE_APPLICATION_ERROR(-20051,'f_Insert_ErwArt() ERROR');
+	WHEN OTHERS THEN
+		Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Insert_ErwArt', sysdate, 'f_Insert_ErwArt() ERROR');
+		COMMIT;
+		RAISE_APPLICATION_ERROR(-20051,'f_Insert_ErwArt() ERROR');
 	
 END;
 /
@@ -208,6 +218,8 @@ BEGIN
 EXCEPTION
 
 WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Insert_Zuordnung', sysdate, 'f_Insert_Zuordnung() ERROR');
+	COMMIT;
 	RAISE_APPLICATION_ERROR(-20051,'f_Insert_Zuordnung() ERROR');
 		
 END;
@@ -272,6 +284,8 @@ BEGIN
 EXCEPTION
 
 WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Insert_Widmung', sysdate, 'f_Insert_Widmung() ERROR');
+	COMMIT;
 	RAISE_APPLICATION_ERROR(-20051,'f_Insert_Widmung() ERROR');
 		
 END;
@@ -331,6 +345,8 @@ BEGIN
 EXCEPTION
 
 WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Insert_Adresse', sysdate, 'f_Insert_Adresse() ERROR');
+	COMMIT;
 	RAISE_APPLICATION_ERROR(-20051,'f_Insert_Adresse() ERROR');
 			
 END;
@@ -379,6 +395,8 @@ BEGIN
 EXCEPTION
 
 WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Insert_KG', sysdate, 'f_Insert_KG() ERROR');
+	COMMIT;
 	RAISE_APPLICATION_ERROR(-20051,'f_Insert_KG() ERROR');
 		
 END;
