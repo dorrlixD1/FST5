@@ -1,0 +1,28 @@
+--------------------------------------------------------
+--  Ref Constraints for Table Liegenschaft
+--------------------------------------------------------
+Alter Table Liegenschaft ADD FOREIGN KEY (Adresse_Id)
+	REFERENCES Adresse(Id) on delete set null enable;
+	
+Alter Table Liegenschaft ADD FOREIGN KEY (ErwArt_Id)
+	REFERENCES ErwArt(Id) on delete set null enable;
+	
+Alter Table Liegenschaft ADD FOREIGN KEY (Widmung_Id)
+	REFERENCES Widmung(Id) on delete set null enable;
+	
+Alter Table Liegenschaft ADD FOREIGN KEY (Zuordnung_Id)
+	REFERENCES Zuordnung(Id) on delete set null enable;
+
+--------------------------------------------------------
+--  Ref Constraints for Table Adresse
+--------------------------------------------------------
+	
+Alter Table Adresse ADD FOREIGN KEY (KG_Code)
+	REFERENCES KG(KG_Code) on delete set null enable;
+	
+--------------------------------------------------------
+--  Ref Constraints for Table KG
+--------------------------------------------------------
+	
+Alter Table KG ADD FOREIGN KEY (PLZ_Code)
+	REFERENCES PLZ(PLZ_Code) on delete set null enable;
