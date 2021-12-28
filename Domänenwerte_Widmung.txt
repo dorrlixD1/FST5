@@ -1,0 +1,52 @@
+/*********************************************************************/
+/**
+/** Table: WidmungsDomän
+/** Developer: Bauer,Dorr
+/** Description: Beinhält die Werte für die Domäne Widmung
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE WidmungsDomain ( 
+
+  WidmungKurz varchar(10) PRIMARY KEY , 
+  WidmungLang varchar(100) not null 
+
+);
+
+Werte
+=======
+
+
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('L'), UPPER('Ländliche Gebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EPK'), UPPER('Erholungsgebiet - Parkanlagen'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EKL'), UPPER('Erholungsgebiet - Kleingartengebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EKLW'), UPPER('Erholungsgebiet - Kleingartengebiete für ganzjähriges Wohnen'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('ESP'), UPPER('Erholungsgebiet - Sport und Spielplätze'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EBD'), UPPER('Erholungsgebiet - Freibäder'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EBH'), UPPER('Erholungsgebiet - Erholungsgebiete für Bevölerung und Grundflächen für Badehütten'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('Sww'), UPPER('Schutzgebiet - Wald und Wiesengürtel'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SWWL'), UPPER('Schutzgebiet - Landwirtschaftliche Nutzung'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SPK'), UPPER('Schutzgebiet - Parkschutzgebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('F'), UPPER('Friedhöfe'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SN'), UPPER('Sondernutzungsgebiete'));
+
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('VB'), UPPER('Verkehrsbänder'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('W'), UPPER('Wohngebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('WGV'), UPPER('Wohngebiete-Geschäftsviertel'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('WGF'), UPPER('wohngebiet-geförderter Wohnbau'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GS'), UPPER('Gartensiedlungsgebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GSGM'), UPPER('Gartensiedlungsgebiet-Gemeinschaftsanlage'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GB'), UPPER('Gemischte Baugebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GBGV'), UPPER('Gemischtes Baugebiet-Geschäftsviertel'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GBGF'), UPPER('Gemischtes Baugebiet - geförderter Wohnbau'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GBBG'), UPPER('Gemischtes Baugebiet - Betriebsbaugebiet'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GBF'), UPPER('Gemischtes Baugebiet - Friedhofsbezogen'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('IG'), UPPER('Industriegebiete'));
+
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('IGBS'), UPPER('Industriegebiet mit bestimmter Verwendungs oder Nutzungsart'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('IGSI'), UPPER('Industriegebiet - Anwendungsbereich Richtlinie 2012/18/EU'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SO'), UPPER('Sondergebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SOLL'), UPPER('Sondergebiete - Lagerplätze und Landeflächen'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SOLLBS'), UPPER('Sondergebiete mit bestimmten Lagerungen'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SOMARKT'), UPPER('Sondergebiete - Sonstige Grundflächen für die Errichtung bestimmter Gebäude - (keine andere Widmung)'))
