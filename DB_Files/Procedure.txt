@@ -267,3 +267,34 @@ SELECT l.ID, l.KAUFPREIS, e.ErwArt, l.ErwDatum, z.Zuordnung, w.WidmungLang FROM 
 
 END;
 /
+
+/*********************************************************************/
+/**
+/** Procedure:  sp_READ_LIEG_Details
+/** Out: Lieg_Rec
+/** In:  KG_CODE, GstNr, EZ
+/** Developer: Dorr, Bauer
+/** Description: Reading all Details of a Liegenschaft
+/**
+/*********************************************************************/
+
+CREATE OR REPLACE 
+PROCEDURE sp_READ_LIEG_HISTORY (l_n_Lieg_Id_i in number,  GET_LS_Details OUT SYS_REFCURSOR)
+AS
+
+BEGIN
+
+
+Open GET_LS_DetailsFOR
+
+SELECT * FROM Liegenschaft l
+	join ErwArt e on e.ID = l.ErwArt_Id
+	join Zuordnung z on z.id = l.Zuordnung_Id
+	join Widmung w on w.id = l.Widmung_ID
+	join Adresse a on a.id = l.Adresse_Id
+	join KG k on k.KG_Code = a.KG_Code
+	join PLZ p on p.plz_Code = k.PLZ_Code
+	WHERE l.id = l_n_Lieg_Id_i;
+
+END;
+/
