@@ -1,0 +1,191 @@
+/*********************************************************************/
+/**
+/** Table: Liegenschaft
+/** Developer: Bauer,Dorr
+/** Description: 
+/** Die Entität „Liegenschaft“ stellt die Tabelle für die Liegenschaften. 
+/** Ein Großteil der Informationen zu Liegenschaften sind in dieser Tabelle
+/** zu finden.
+/** Ausgenommen: Erwerbsart, Widmung, Zuordnung, Adresse, Katastralgemeinde, PLZ
+/**
+/*********************************************************************/
+Create TABLE Liegenschaft ( 
+
+  id number PRIMARY KEY, 
+  Adresse_Id number not null, 
+  GstNr varchar(10), 
+  Zaehler number not null,
+  Nenner number not null,
+  Ez number not null,
+  Geschosse number,
+  ErwArt_Id number not null,
+  ErwDatum date,
+  GstFl number not null,
+  Parzelliert NUMBER(1) NOT NULL CHECK  (Parzelliert in (0,1)),
+  Zuordnung_id number not null,
+  Widmung_Id number not null,
+  Baujahr number,
+  Kaufpreis number(13,2) not null,
+  Tagebuchzahl varchar(10) not null,
+  Schutzzone NUMBER(1) NOT NULL CHECK  (Schutzzone in (0,1)),
+  Wohnzone NUMBER(1) NOT NULL CHECK  (Wohnzone in (0,1)),
+  oeZ NUMBER(1) NOT NULL CHECK  (oeZ in (0,1)),
+  Bausperre NUMBER(1) NOT NULL CHECK  (Bausperre in (0,1)),
+  BausperreBis date,
+  Baureifgest NUMBER(1) NOT NULL CHECK  (Baureifgest in (0,1)),
+  Baurecht NUMBER(1) NOT NULL CHECK  (Baurecht in (0,1)),
+  BOL_AKTIV NUMBER(1) NOT NULL CHECK  (BOL_AKTIV in (0,1))
+);
+
+/*********************************************************************/
+/**
+/** Table: ErwArt
+/** Developer: Bauer,Dorr
+/** Description: Die Entität "Erwerbsart" stellt alle Erwerbsarten, die
+/** vom Backend eingespielt werden dar. 
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE ErwArt ( 
+
+  id number PRIMARY KEY , 
+  ErwArt varchar(50) not null 
+
+);
+
+/*********************************************************************/
+/**
+/** Table: Widmung
+/** Developer: Bauer,Dorr
+/** Description: Die Entität "Widmung" enthält alle möglichen
+/** Widmungen, die zu einer Liegenschaft eingetragen werden können.
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE Widmung ( 
+
+  id number PRIMARY KEY , 
+
+  WidmungKurz varchar(15) not null, 
+  WidmungLang varchar(250)
+
+);
+
+
+/*********************************************************************/
+/**
+/** Table: Adresse
+/** Developer: Bauer,Dorr
+/** Description: Die Entität "Adresse" beinhält alle Adressen, die
+/** für eine Liegenschaft eingertagen wurden
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE Adresse ( 
+
+  id number PRIMARY KEY , 
+  KG_Code number not null, 
+  Strasse varchar(50),
+  Orientierungsnummer varchar(10)
+
+);
+
+
+/*********************************************************************/
+/**
+/** Table: KG
+/** Developer: Bauer,Dorr
+/** Description: Die Entiät "KG" (Katastralgemeinde) beinhält alle
+/** Katastralgemeinden, die zu diversen Liegenschaften verknüpft sind.
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE KG ( 
+
+  KG_Code number PRIMARY KEY ,  
+  Katastralgemeinde varchar(50),
+  PLZ_Code number not null
+
+);
+
+
+/*********************************************************************/
+/**
+/** Table: PLZ
+/** Developer: Bauer,Dorr
+/** Description: Die Entität "PLZ" beinhält alle
+/** Postleitzahlen, die zu diversen Liegenschaften verknüpft sind.
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE PLZ ( 
+
+  PLZ_Code number PRIMARY KEY ,  
+  PlzName varchar(50) not null
+
+);
+
+
+
+/*********************************************************************/
+/**
+/** Table: Zuordnung
+/** Developer: Bauer,Dorr
+/** Description: Die Entität "Zuodnung" beinhält die mögliche Zuordnungen, 
+/** die Liegenschaften zugeordnet werden können.
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE Zuordnung ( 
+
+  Id number PRIMARY KEY ,  
+  Zuordnung varchar(50) not null
+
+);
+
+/*********************************************************************/
+/**
+/** Table: ERRORLOG
+/** Developer: Bauer,Dorr
+/** Description: Die Entität „ErrorLog“ stellt die Tabelle für die Fehlerdaten. 
+/** Sämtliche Fehler sind dieser Tabelle zu entnehmen.
+/**
+/*********************************************************************/
+CREATE TABLE ERRORLOG ( 
+
+  id number PRIMARY KEY, 
+
+  entity varchar(50) not null, 
+
+  date_of_occ timestamp default current_timestamp not null, 
+
+  errorMessage varchar(200) not null
+);
+
+/*********************************************************************/
+/**
+/** Table: CHANGELOG
+/** Developer: Bauer,Dorr
+/** Description: Die Entität „ChangeLog“ stellt die Tabelle für die Änderungen. 
+/** Sämtliche Tansaktionsänderungen sind dieser Tabelle zu entnehmen.
+/**
+/*********************************************************************/
+CREATE TABLE CHANGELOG ( 
+
+  id number PRIMARY KEY, 
+
+  action VARCHAR(10) CHECK( action IN ('Update','Delete')) not null, 
+
+  entity varchar(50) not null, 
+
+  date_of_occ timestamp default current_timestamp not null, 
+
+  description varchar(200) 
+
+); 
