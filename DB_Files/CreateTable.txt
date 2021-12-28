@@ -14,8 +14,6 @@ Create TABLE Liegenschaft (
   id number PRIMARY KEY, 
   Adresse_Id number not null, 
   GstNr varchar(10), 
-  Zaehler number not null,
-  Nenner number not null,
   Ez number not null,
   Geschosse number,
   ErwArt_Id number not null,
