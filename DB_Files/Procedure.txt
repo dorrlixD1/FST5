@@ -14,7 +14,7 @@ PROCEDURE sp_INSERT_LIEGREC (l_n_KG_Code_i in number, l_v_Katastralgemeinde_i in
 l_v_straße_i in varchar, l_v_Orientierungsnummer_in in varchar, l_v_Grundstuecksnummer_i in varchar, l_n_Grundstuecksflaeche_i in number, 
 l_v_ErwArt_i in varchar, l_d_ErwDatum_i in date, l_v_Widmung_i in varchar, l_n_Schutzzone_i in number, l_n_Wohnzone_i in number, l_n_OEZ_i in number,
 l_n_Bausperre_i in number, l_d_BausperreBis_i in date, l_v_Zuordnung_i in varchar, l_n_Geschoße_i in number, l_n_parzelliert_i in number, 
-l_n_Zaehler_i in number, l_n_Nenner_i in number, l_d_Baujahr_i in number, l_v_Tagebuchzahl_i in varchar, l_n_Kaufpreis_i in decimal,  
+l_d_Baujahr_i in number, l_v_Tagebuchzahl_i in varchar, l_n_Kaufpreis_i in decimal,  
 l_n_Baureifgest_i in number, l_n_Baurecht_i in number)
 
 AS
@@ -61,8 +61,6 @@ Begin
 		OR l_n_Schutzzone_i											IS NULL
 		OR l_n_Wohnzone_i												IS NULL
 		OR l_n_OEZ_i														IS NULL
-		Or l_n_Zaehler_i												IS NULL
-		OR l_n_Nenner_i													IS NULL
 		OR l_n_parzelliert_i										IS NULL
 		OR l_n_Baureifgest_i										IS NULL
 		OR l_n_Baurecht_i												IS NULL
@@ -76,7 +74,6 @@ Begin
 		OR LENGTH(l_v_Katastralgemeinde_i) 			> 50
 		OR LENGTH(l_n_PLZ_Code_i) 							!=  4
 		OR LENGTH(l_v_Grundstuecksnummer_i) 		> 10
-		OR l_n_Nenner_i 												= 0	
 		OR f_checkBoolean_n(l_n_Schutzzone_i) 	!= n_TRUE
 		OR f_checkBoolean_n(l_n_Wohnzone_i) 		!= n_TRUE
 		OR f_checkBoolean_n(l_n_OEZ_i) 					!= n_TRUE
@@ -154,9 +151,9 @@ Begin
 -- Insert new Property
 	n_propertyID := f_nextID_n('Liegenschaft');
 	
-	Insert into Liegenschaft(Id, Adresse_Id, GstNr, Zaehler, Nenner, EZ, Geschosse, ErwArt_Id, ErwDatum, GstFl, Parzelliert, 
+	Insert into Liegenschaft(Id, Adresse_Id, GstNr, EZ, Geschosse, ErwArt_Id, ErwDatum, GstFl, Parzelliert, 
 		Zuordnung_Id, Widmung_Id, Baujahr, Kaufpreis, Tagebuchzahl, Schutzzone, Wohnzone, oeZ, Bausperre, BausperreBis, BAUREIFGEST, Baurecht, BOL_AKTIV)
-		values (n_propertyID,n_adresseID, UPPER(l_v_Grundstuecksnummer_i), l_n_Zaehler_i, l_n_Nenner_i, l_n_EZ_i, l_n_Geschoße_i, n_erwArtID, l_d_ErwDatum_i, l_n_Grundstuecksflaeche_i,
+		values (n_propertyID,n_adresseID, UPPER(l_v_Grundstuecksnummer_i), l_n_EZ_i, l_n_Geschoße_i, n_erwArtID, l_d_ErwDatum_i, l_n_Grundstuecksflaeche_i,
 		l_n_parzelliert_i, n_zuordnungID, n_widmungID, l_d_Baujahr_i, l_n_Kaufpreis_i, l_v_Tagebuchzahl_i, l_n_Schutzzone_i, l_n_Wohnzone_i, l_n_OEZ_i, l_n_Bausperre_i, l_d_BausperreBis_i,   
 		l_n_Baureifgest_i,l_n_Baurecht_i, n_BOL_Aktiv ); 
 		
@@ -166,36 +163,36 @@ Begin
 Exception
 
 	When x_parameter_fehler_null THEN
-	  sp_Insert_ErrorLogEntry('Liegenschaft', 'ERR; PARAMETER FEHLER! Mindestens ein Parameterwert ist NULL!! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+	  sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; PARAMETER FEHLER! Mindestens ein Parameterwert ist NULL!! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
 		RAISE_APPLICATION_ERROR(-20001, 'ERR; PARAMETER FEHLER! Mindestens ein Parameterwert ist NULL!');
 		
 	when x_parameter_fehler THEN
-	  sp_Insert_ErrorLogEntry('Liegenschaft', 'ERR; PARAMETER FEHLER! Datentyp oder definierte Parameterlänge nicht eingehalten!! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+	  sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; PARAMETER FEHLER! Datentyp oder definierte Parameterlänge nicht eingehalten!! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
 		RAISE_APPLICATION_ERROR(-20002, 'ERR; PARAMETER FEHLER! Datentyp oder definierte Parameterlänge nicht eingehalten!');
 		
 	When x_insert_err_KG THEN
-		sp_Insert_ErrorLogEntry('KG', 'ERR; Bei Anlage des KG-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des KG-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
 		RAISE_APPLICATION_ERROR(-20004, 'ERR; Bei Anlage des KG-Satzes!');
 		
 	when x_insert_err_ErwArt THEN
-		sp_Insert_ErrorLogEntry('Widmung', 'ERR; Bei Anlage des ErwArt-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des ErwArt-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
 		RAISE_APPLICATION_ERROR(-20005, 'ERR; Bei Anlage des ErwArt-Satzes!');
 		
 	when x_insert_err_Zuordnung THEN
-	  sp_Insert_ErrorLogEntry('Zuordnung', 'ERR; Bei Anlage des Zuordnungs-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
+	  sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des Zuordnungs-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
 		RAISE_APPLICATION_ERROR(-20006, 'ERR; Bei Anlage des Zuordnungs-Satzes!');
 		
 	when x_insert_err_Widmung ThEN
-		sp_Insert_ErrorLogEntry('Widmung', 'ERR; Bei Anlage des Widmungs-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);       
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des Widmungs-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);       
 		RAISE_APPLICATION_ERROR(-20007, 'ERR; Bei Anlage des Widmungs-Satzes!');
 		
 	when x_insert_err_Adresse THEN
-		sp_Insert_ErrorLogEntry('Adresse', 'ERR; Bei Anlage des Adresssatzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des Adresssatzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
 		RAISE_APPLICATION_ERROR(-20008, 'ERR; Bei Anlage des Adresssatzes!');
 	
 		
 	When OTHERS THEN
-		sp_Insert_ErrorLogEntry('Liegenschaft', ' EZ: ' || l_n_EZ_i || 'Katastralgemeide:' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', ' EZ: ' || l_n_EZ_i || 'Katastralgemeide:' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
 		RAISE;
 	
 End;

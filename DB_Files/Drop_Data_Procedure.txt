@@ -1,0 +1,35 @@
+/*********************************************************************/
+/**
+/** Procedure:  sp_Delete_Lieg 
+/** Developer: Dorr, Bauer
+/** Description: Löscht alle Liegenschaftseinträge + dazugehörige Daten
+/**
+/*********************************************************************/
+
+Create or replace
+Procedure sp_Delete_Lieg 
+
+AS
+
+Begin
+
+	Delete from Liegenschaft;
+	Delete from Adresse;
+	Delete from KG;
+	Delete from Zuordnung;
+	Delete from Widmung;
+	Delete from ErwArt;
+
+	Commit;
+	
+	-- Excetption Handling
+	EXCEPTION
+
+	When others then
+
+			sp_Insert_ErrorLogEntry('SP_Delete_Lieg' ,'ERR; Löschen der LG-Daten nicht möglich! ' || SQLCODE || ' ' || SQLERRM);
+			Rollback;
+			RAISE;
+		
+End;
+/
