@@ -1,0 +1,47 @@
+/*********************************************************************/
+/**
+/** View: PlzView
+/** Developer: Dorr,Bauer
+/** Description: Liefert alle PLZ
+/**
+/*********************************************************************/
+
+CREATE or REPLACE VIEW PlzView
+as
+select plz_code from PLZ;
+
+/*********************************************************************/
+/**
+/** View: KGView
+/** Developer: Dorr,Bauer
+/** Description: Liefert alle Katastralgemeinden + PLZ
+/**
+/*********************************************************************/
+
+CREATE or REPLACE VIEW KGView
+as
+select Katastralgemeinde, plz_code from KG;
+
+/*********************************************************************/
+/**
+/** View: KGView
+/** Developer: Dorr,Bauer
+/** Description: Liefert alle Widmungen
+/**
+/*********************************************************************/
+
+CREATE or REPLACE VIEW WidmungenView
+as
+select Widmunglang from Widmungsdomain;
+
+/*********************************************************************/
+/**
+/** View: ZuordungView
+/** Developer: Dorr,Bauer
+/** Description: Liefert alle Widmungen
+/**
+/*********************************************************************/
+
+CREATE or REPLACE VIEW ZuordnungView
+as
+select distinct Zuordnung from Zuordnung;
