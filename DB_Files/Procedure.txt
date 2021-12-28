@@ -163,36 +163,36 @@ Begin
 Exception
 
 	When x_parameter_fehler_null THEN
-	  sp_Insert_ErrorLogEntry('Liegenschaft', 'ERR; PARAMETER FEHLER! Mindestens ein Parameterwert ist NULL!! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+	  sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; PARAMETER FEHLER! Mindestens ein Parameterwert ist NULL!! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
 		RAISE_APPLICATION_ERROR(-20001, 'ERR; PARAMETER FEHLER! Mindestens ein Parameterwert ist NULL!');
 		
 	when x_parameter_fehler THEN
-	  sp_Insert_ErrorLogEntry('Liegenschaft', 'ERR; PARAMETER FEHLER! Datentyp oder definierte Parameterlänge nicht eingehalten!! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+	  sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; PARAMETER FEHLER! Datentyp oder definierte Parameterlänge nicht eingehalten!! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
 		RAISE_APPLICATION_ERROR(-20002, 'ERR; PARAMETER FEHLER! Datentyp oder definierte Parameterlänge nicht eingehalten!');
 		
 	When x_insert_err_KG THEN
-		sp_Insert_ErrorLogEntry('KG', 'ERR; Bei Anlage des KG-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des KG-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
 		RAISE_APPLICATION_ERROR(-20004, 'ERR; Bei Anlage des KG-Satzes!');
 		
 	when x_insert_err_ErwArt THEN
-		sp_Insert_ErrorLogEntry('Widmung', 'ERR; Bei Anlage des ErwArt-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des ErwArt-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
 		RAISE_APPLICATION_ERROR(-20005, 'ERR; Bei Anlage des ErwArt-Satzes!');
 		
 	when x_insert_err_Zuordnung THEN
-	  sp_Insert_ErrorLogEntry('Zuordnung', 'ERR; Bei Anlage des Zuordnungs-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
+	  sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des Zuordnungs-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
 		RAISE_APPLICATION_ERROR(-20006, 'ERR; Bei Anlage des Zuordnungs-Satzes!');
 		
 	when x_insert_err_Widmung ThEN
-		sp_Insert_ErrorLogEntry('Widmung', 'ERR; Bei Anlage des Widmungs-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);       
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des Widmungs-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);       
 		RAISE_APPLICATION_ERROR(-20007, 'ERR; Bei Anlage des Widmungs-Satzes!');
 		
 	when x_insert_err_Adresse THEN
-		sp_Insert_ErrorLogEntry('Adresse', 'ERR; Bei Anlage des Adresssatzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des Adresssatzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
 		RAISE_APPLICATION_ERROR(-20008, 'ERR; Bei Anlage des Adresssatzes!');
 	
 		
 	When OTHERS THEN
-		sp_Insert_ErrorLogEntry('Liegenschaft', ' EZ: ' || l_n_EZ_i || 'Katastralgemeide:' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', ' EZ: ' || l_n_EZ_i || 'Katastralgemeide:' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
 		RAISE;
 	
 End;
