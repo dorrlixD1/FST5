@@ -66,6 +66,11 @@ BEGIN
 			return n_FALSE;
 	END IF;
 
+EXCEPTION
+
+WHEN OTHERS THEN
+	RAISE_APPLICATION_ERROR(-20051,'f_checkBoolean_n() ERROR');
+
 END;
 /
 
@@ -102,7 +107,12 @@ BEGIN
 	else
 		return n_FALSE;
 	END IF;
-	 	
+	
+EXCEPTION
+
+WHEN OTHERS THEN
+	RAISE_APPLICATION_ERROR(-20051,'f_Check_Existing_Rec() ERROR');
+		 	
 END;
 /
 
@@ -147,6 +157,11 @@ BEGIN
 	
 	END IF;
 
+EXCEPTION
+
+WHEN OTHERS THEN
+	RAISE_APPLICATION_ERROR(-20051,'f_Insert_ErwArt() ERROR');
+	
 END;
 /
 
@@ -189,7 +204,12 @@ BEGIN
 		RETURN l_n_nextID;
 	
 	END IF; 
-	
+
+EXCEPTION
+
+WHEN OTHERS THEN
+	RAISE_APPLICATION_ERROR(-20051,'f_Insert_Zuordnung() ERROR');
+		
 END;
 /
 
@@ -248,7 +268,12 @@ BEGIN
 		RETURN l_n_nextID;
 	
 	END IF;
+	
+EXCEPTION
 
+WHEN OTHERS THEN
+	RAISE_APPLICATION_ERROR(-20051,'f_Insert_Widmung() ERROR');
+		
 END;
 /
 
@@ -302,7 +327,12 @@ BEGIN
 		RETURN l_n_currentID;
 		
 	END IF;
-	
+
+EXCEPTION
+
+WHEN OTHERS THEN
+	RAISE_APPLICATION_ERROR(-20051,'f_Insert_Adresse() ERROR');
+			
 END;
 /
 
@@ -346,5 +376,10 @@ BEGIN
 		
 	END IF;
 
+EXCEPTION
+
+WHEN OTHERS THEN
+	RAISE_APPLICATION_ERROR(-20051,'f_Insert_KG() ERROR');
+		
 END;
 /
