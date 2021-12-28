@@ -204,7 +204,7 @@ declare
 
 begin
 sp_INSERT_LIEGREC(1100, 'Neuklappersdorf' , 1002, 1030, 'La Viva Re Straße 45', '3a', '5665', 1000, 
-'Kauf',  to_date('2023-04-29', 'YYYY-MM-DD'), 'WIGBFOGL', 0, 1, 0, 0, CURRENT_TIMESTAMP, 'Einfamilienhaus', 4, 0, 1, 1, 2012, '6037/59',2006100.45, 0, 0);
+'Kauf',  to_date('2023-04-29', 'YYYY-MM-DD'), 'WIGBFOGL', 0, 1, 0, 0, CURRENT_TIMESTAMP, 'Einfamilienhaus', 4, 0, 2012, '6037/59',2006100.45, 0, 0);
 
 end;
 /
@@ -230,6 +230,40 @@ BEGIN
 		l_n_nextID := f_nextID_n('ERRORLOG'); 
 		INSERT INTO ERRORLOG(Id, entity, date_of_occ, errorMessage) values (l_n_nextID, l_v_tablename ,sysdate, l_v_errorMessage );
 		COMMIT;
+
+END;
+/
+
+/*********************************************************************/
+/**
+/** Procedure:  sp_READ_LIEG_HISTORY
+/** Out: SYS-REFCURSOR
+/** In:  KG_CODE, GstNr, EZ
+/** Developer: Dorr, Bauer
+/** Description:
+/**
+/*********************************************************************/
+
+CREATE OR REPLACE 
+PROCEDURE sp_READ_LIEG_HISTORY (l_n_KG_Code_i in number, l_v_Grundstuecksnummer_i in varchar, l_n_EZ_i in number, GET_LS_HISTORY OUT SYS_REFCURSOR)
+AS
+
+
+BEGIN
+
+Open GET_LS_HISTORY FOR
+
+SELECT l.ID, l.KAUFPREIS, e.ErwArt, l.ErwDatum, z.Zuordnung, w.WidmungLang FROM Liegenschaft l
+	join ErwArt e on e.ID = l.ErwArt_Id
+	join Zuordnung z on z.id = l.Zuordnung_Id
+	join Widmung w on w.id = l.Widmung_ID
+	join Adresse a on a.id = l.Adresse_Id
+	WHERE a.KG_Code = l_n_KG_Code_i
+		AND l.GstNr = l_v_Grundstuecksnummer_i
+		AND l.EZ = l_n_EZ_i
+		AND l.BOL_AKTIV = 0
+		ORDEr BY l.ERWDATUM DESC;
+
 
 END;
 /
