@@ -57,7 +57,7 @@ select distinct Zuordnung from Zuordnung;
 /*********************************************************************/
 CREATE or REPLACE VIEW SearchView
 as
-select l.* ,z.Zuordnung,  w.WidmungKurz, k.KG_Code, a.Strasse, a.Orientierungsnummer,
+select l.* ,z.Zuordnung,  w.WidmungLang, w.WidmungKurz, k.KG_Code, a.Strasse, a.Orientierungsnummer,
 	k.Katastralgemeinde, k.PLZ_Code FROM Liegenschaft l
 	join Zuordnung z on z.id = l.Zuordnung_Id 
 	join Widmung w on w.id = l.Widmung_ID 
