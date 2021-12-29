@@ -1,0 +1,105 @@
+CREATE OR REPLACE PROCEDURE sp_Search_LIEGREC (l_n_PLZ_Code_i IN number, l_v_Katastralgemeinde_i IN varchar,l_v_Strasse_i IN varchar, l_v_WidmungLang_i In varchar,
+l_v_Zuordnung_i IN varchar, l_n_PreisVon_i in number, l_n_PreisBis_i in number, l_n_FlaecheVon_i in number, l_n_FlaecheBis_i in number, l_n_BaujahrVon_i in number, l_n_BaujahrBis_i in number,
+l_n_ErwDatumVon_i in varchar, l_n_ErwDatumBis_i in varchar, l_n_Bausperre_i in number, l_n_Baurecht_i in number, l_n_Schutzzone_i in number,
+l_n_Parzelliert_i in number, l_n_OeZwecke_i in number, l_n_Baureifgestaltung_i in number , Search_cur_out OUT SYS_REFCURSOR)
+
+AS
+
+
+
+--Constants
+n_k_TRUE number := 1;
+n_k_FALSE number := 0;
+v_k_Select_PLZ_Code varchar(100) := 'SearchView.PLZ_Code = ' || l_n_PLZ_Code_i;
+v_k_Select_Katastralgemeinde varchar(150) := 'SearchView.Katastralgemeinde =' || '''' || l_v_Katastralgemeinde_i || '''';
+v_k_Select_Strasse varchar(150) := 'SearchView.Strasse LIKE ' || '''%' || l_v_Strasse_i;
+v_k_Select_Widmung varchar(350) := 'SearchView.WidmungLang LIKE ' || '''%' || l_v_WidmungLang_i || '%''';
+v_k_Select_Zuordnung varchar(150) := 'SearchView.Zuordnung = ' || l_v_Zuordnung_i;
+v_k_Select_Preis varchar(150) := 'SearchView.Kaufpreis BETWEEN ' || l_n_PreisVon_i || ' AND ' || l_n_PreisBis_i;
+v_k_Select_Flaeche varchar(150) := 'SearchView.GstFl BETWEEN ' || l_n_FlaecheVon_i || ' AND ' || l_n_FlaecheBis_i;
+v_k_Select_Baujahr varchar(150) := 'SearchView.Baujahr BETWEEN ' || l_n_BaujahrVon_i || ' AND ' || l_n_BaujahrBis_i;
+v_k_Select_ErwDatum varchar(300) := 'SearchView.ErwDatum BETWEEN to_Date(''' || l_n_ErwDatumVon_i || ''', ''YYYY-MM-DD''' || ' AND ' || 'to_Date(''' || l_n_ErwDatumBis_i || ''', ''YYYY-MM-DD'')';
+v_k_Select_Bausperre varchar(150) := 'SearchView.Bausperre = ' || l_n_Bausperre_i;
+v_k_Select_Baurecht varchar(150) := 'SearchView.Baurecht = ' || l_n_Baurecht_i;
+v_k_Select_Schutzzone varchar(150) := 'SearchView.Schutzzone = ' || l_n_Schutzzone_i;
+v_k_Select_Parzelliert varchar(150) := 'SearchView.Parzelliert = ' || l_n_Parzelliert_i;
+v_k_Select_oeZ varchar(150) := 'SearchView.oeZ = ' || l_n_OeZwecke_i;
+v_k_Select_Baureifgest varchar(150) := 'SearchView.Baureifgest = ' || l_n_Baureifgestaltung_i;
+
+
+
+l_v_SelectString varchar2(3000) := ' select SearchView.id, SearchView.PLZ_Code, SearchView.Katastralgemeinde, SearchView.Strasse,
+SearchView.Orientierungsnummer, SearchView.Zuordnung, SearchView.WidmungLang, SearchView.Kaufpreis from SearchView WHERE SearchView.BOL_AKTIV = 1 ';
+
+--l_v_SelectString varchar2(3000) := ' select SearchView.id from SearchView WHERE SearchView.BOL_AKTIV = 1 ';
+
+BEGIN
+
+	IF l_n_PLZ_Code_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_PLZ_Code;
+	END IF;
+
+	IF l_v_Katastralgemeinde_i IS NOT NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Katastralgemeinde;
+	END IF;
+
+	IF l_v_Strasse_i IS NOT NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Strasse;
+	END IF;
+
+	IF l_v_WidmungLang_i IS NOT NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Widmung;
+	END IF;
+
+	IF l_v_Zuordnung_i IS NOT NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Zuordnung;
+	END IF;
+
+	IF l_n_PreisVon_i > 0 AND l_n_PreisBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Preis;
+	END IF;
+
+	IF l_n_FlaecheVon_i > 0 AND l_n_FlaecheBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Flaeche;
+	END IF;
+
+	IF l_n_BaujahrVon_i > 0 AND l_n_BaujahrBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Baujahr;
+	END IF;
+
+	IF l_n_ErwDatumVon_i > 0 AND l_n_ErwDatumBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_ErwDatum;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_Bausperre_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Bausperre;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_Baurecht_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Baurecht;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_Schutzzone_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Schutzzone;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_Parzelliert_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Parzelliert;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_OeZwecke_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_oeZ;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_Baureifgestaltung_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Baureifgest;
+	END IF;
+
+
+--dbms_output.put_line(l_v_SelectString);
+
+Open Search_cur_out FOR
+ l_v_SelectString;
+
+END;
+/
