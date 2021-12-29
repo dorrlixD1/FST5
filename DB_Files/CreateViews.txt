@@ -45,3 +45,21 @@ select Widmunglang from Widmungsdomain;
 CREATE or REPLACE VIEW ZuordnungView
 as
 select distinct Zuordnung from Zuordnung;
+
+
+
+/*********************************************************************/
+/**
+/** View: SearchView
+/** Developer: Dorr,Bauer
+/** Description: View f. dyn Suche
+/**
+/*********************************************************************/
+CREATE or REPLACE VIEW SearchView
+as
+select l.* ,z.Zuordnung,  w.WidmungKurz, k.KG_Code, a.Strasse, a.Orientierungsnummer,
+	k.Katastralgemeinde, k.PLZ_Code FROM Liegenschaft l
+	join Zuordnung z on z.id = l.Zuordnung_Id 
+	join Widmung w on w.id = l.Widmung_ID 
+	join Adresse a on a.id = l.Adresse_Id 
+	join KG k on k.KG_Code = a.KG_Code;
