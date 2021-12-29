@@ -285,7 +285,7 @@ AS
 BEGIN
 
 
-Open GET_LS_DetailsFOR
+Open GET_LS_Details FOR
 
 SELECT * FROM Liegenschaft l
 	join ErwArt e on e.ID = l.ErwArt_Id
