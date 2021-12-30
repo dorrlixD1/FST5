@@ -1,10 +1,49 @@
-CREATE OR REPLACE PROCEDURE sp_Search_LIEGREC (l_n_PLZ_Code_i IN number, l_v_Katastralgemeinde_i IN varchar,l_v_Strasse_i IN varchar, l_v_WidmungLang_i In varchar,
+declare
+l_cursor SYS_REFCURSOR;
+
+id Liegenschaft.id%type;
+p KG.PLZ_CODE%Type;
+k KG.KATASTRALGEMEINDE%TYPE;
+s Adresse.Strasse%Type;
+o Adresse.Orientierungsnummer%Type;
+z Zuordnung.Zuordnung%Type;
+w Widmung.WidmungLang%Type;
+ka Liegenschaft.Kaufpreis%Type;
+
+begin 
+
+
+l_cursor := f_Search_LIEGREC(0, null, Null, Null, null, 0,0,0,0,0,0,null, null, -1,-1,-1,-1,-1,-1);
+
+loop
+
+	fetch l_cursor into id, p, k,s,o,z,w,ka;
+	exit when l_cursor%notfound;
+	
+
+dbms_output.put_line(id || ' '|| p || ' '||k || ' '||  s || ' '  || o|| ' ' || z || ' ' ||   w || ' ' ||ka);
+
+
+
+END LOOp;
+
+close l_cursor;
+
+end;
+/
+
+
+
+CREATE OR REPLACE function f_Search_LIEGREC (l_n_PLZ_Code_i IN number, l_v_Katastralgemeinde_i IN varchar,l_v_Strasse_i IN varchar, l_v_WidmungLang_i In varchar,
 l_v_Zuordnung_i IN varchar, l_n_PreisVon_i in number, l_n_PreisBis_i in number, l_n_FlaecheVon_i in number, l_n_FlaecheBis_i in number, l_n_BaujahrVon_i in number, l_n_BaujahrBis_i in number,
 l_v_ErwDatumVon_i in varchar, l_v_ErwDatumBis_i in varchar, l_n_Bausperre_i in number, l_n_Baurecht_i in number, l_n_Schutzzone_i in number,
-l_n_Parzelliert_i in number, l_n_OeZwecke_i in number, l_n_Baureifgestaltung_i in number , Search_cur_out OUT SYS_REFCURSOR)
+l_n_Parzelliert_i in number, l_n_OeZwecke_i in number, l_n_Baureifgestaltung_i in number)
+RETURN SYS_REFCURSOR
 
 AS
 
+
+Search_cur_out  SYS_REFCURSOR;
 --Constants
 n_k_TRUE number := 1;
 n_k_FALSE number := 0;
@@ -91,10 +130,13 @@ BEGIN
 		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Baureifgest;
 	END IF;
 
---dbms_output.put_line(l_v_SelectString);
 
-Open Search_cur_out FOR
- l_v_SelectString;
+
+--dbms_output.put_line(l_v_SelectString);
+OPEN Search_cur_out FOR
+l_v_SelectString;
+ return Search_cur_out;
 
 END;
 /
+
