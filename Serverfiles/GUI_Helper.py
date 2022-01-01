@@ -74,6 +74,37 @@ def getKG():
     cursor.close()
     return plzdict
   
+
+@app.route('/filterwidmung')
+# ‘/’ URL is bound with hello_world() function.
+def getWidmung():
+    sql = "Select * from WIDMUNGENVIEW"
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    plzdict = dict()
+    i = 0
+    for row in result:
+        plzdict[i]=row
+        i+=1
+    cursor.close()
+    return plzdict
+
+@app.route('/filterzuordnung')
+# ‘/’ URL is bound with hello_world() function.
+def getZuordnung():
+    sql = "Select * from ZUORDNUNGVIEW"
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    plzdict = dict()
+    i = 0
+    for row in result:
+        plzdict[i]=row
+        i+=1
+    cursor.close()
+    return plzdict
+
 # main driver function
 if __name__ == '__main__':
   
