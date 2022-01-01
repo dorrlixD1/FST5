@@ -37,6 +37,42 @@ def getCoords():
     CoordsDict['lon']=result[0]['lon']
     res = [result[0]['lat'], result[0]['lon']]
     return CoordsDict
+
+
+@app.route('/filterplz')
+# ‘/’ URL is bound with hello_world() function.
+def getPLZ():
+    sql = "Select * from PLZVIEW"
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    plzdict = dict()
+    i = 0
+    for row in result:
+        plzdict[i]=row
+        i+=1
+    cursor.close()
+    return plzdict
+
+@app.route('/filterkg')
+# ‘/’ URL is bound with hello_world() function.
+def getKG():
+    plz = request.args.get("plz")
+    sql =""
+    if plz == "":
+        sql = "Select * from KGVIEW"
+    else:
+        sql = "Select * from KGVIEW WHERE PLZ_CODE="+str(plz)
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    plzdict = dict()
+    i = 0
+    for row in result:
+        plzdict[i]=row
+        i+=1
+    cursor.close()
+    return plzdict
   
 # main driver function
 if __name__ == '__main__':
