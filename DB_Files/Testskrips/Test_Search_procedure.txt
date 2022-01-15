@@ -9,19 +9,21 @@ o Adresse.Orientierungsnummer%Type;
 z Zuordnung.Zuordnung%Type;
 w Widmung.WidmungLang%Type;
 ka Liegenschaft.Kaufpreis%Type;
+erw Liegenschaft.ErwDatum%Type;
+bj Liegenschaft.Baujahr%Type;
+gst Liegenschaft.GSTFL%Type;
 
 begin 
 
-
-l_cursor := f_Search_LIEGREC(0, null, Null, Null, null, 0,0,0,0,0,0,null, null, -1,-1,-1,-1,-1,-1);
+l_cursor := f_Search_LIEGREC(0, null , Null, Null, null, 0,0,0,0,0,0,null, null, -1,-1,-1,-1,-1,-1);
 
 loop
 
-	fetch l_cursor into id, p, k,s,o,z,w,ka;
+	fetch l_cursor into id, p, k,s,o,z,w,ka, erw, bj, gst;
 	exit when l_cursor%notfound;
 	
 
-dbms_output.put_line(id || ' '|| p || ' '||k || ' '||  s || ' '  || o|| ' ' || z || ' ' ||   w || ' ' ||ka);
+dbms_output.put_line(id || ' '|| p || ' '||k || ' '||  s || ' '  || o|| ' ' || z || ' ' ||   w || ' ' ||ka || ' ' || erw || ' ' || bj || ' ' || gst);
 
 
 
@@ -31,6 +33,7 @@ close l_cursor;
 
 end;
 /
+
 
 
 
