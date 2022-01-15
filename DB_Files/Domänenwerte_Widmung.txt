@@ -10,14 +10,11 @@
 CREATE TABLE WidmungsDomain ( 
 
   WidmungKurz varchar(10) PRIMARY KEY , 
-  WidmungLang varchar(100) not null 
+  WidmungLang varchar(110) not null 
 
 );
 
-Werte
-=======
-
-
+-- Werte
 Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('L'), UPPER('Ländliche Gebiete'));
 Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EPK'), UPPER('Erholungsgebiet - Parkanlagen'));
 Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EKL'), UPPER('Erholungsgebiet - Kleingartengebiete'));
