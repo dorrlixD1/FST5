@@ -1,3 +1,25 @@
+/*********************************************************************
+/** Procedure: sp_Insert_ErrorLogEntry
+/** Developer: Dorr
+/** Description: Erstellt einen Eintrag im Errorlog.
+/**
+/**********************************************************************/
+CREATE or REPLACE
+PROCEDURE sp_Insert_ErrorLogEntry (l_v_tablename in varchar, l_v_errorMessage in varchar)
+IS
+	
+	-- locals
+	l_n_nextID number;
+
+BEGIN
+
+		l_n_nextID := f_nextID_n('ERRORLOG'); 
+		INSERT INTO ERRORLOG(Id, entity, date_of_occ, errorMessage) values (l_n_nextID, l_v_tablename ,sysdate, l_v_errorMessage );
+		COMMIT;
+
+END;
+/
+
 /*********************************************************************/
 /**
 /** Procedure:  sp_INSERT_LIEGREC
@@ -209,30 +231,6 @@ sp_INSERT_LIEGREC(1100, 'Neuklappersdorf' , 1002, 1030, 'La Viva Re Straße 45',
 end;
 /
 
-
-
-
-/*********************************************************************
-/** Procedure: sp_Insert_ErrorLogEntry
-/** Developer: Dorr
-/** Description: Erstellt einen Eintrag im Errorlog.
-/**
-/**********************************************************************/
-CREATE or REPLACE
-PROCEDURE sp_Insert_ErrorLogEntry (l_v_tablename in varchar, l_v_errorMessage in varchar)
-IS
-	
-	-- locals
-	l_n_nextID number;
-
-BEGIN
-
-		l_n_nextID := f_nextID_n('ERRORLOG'); 
-		INSERT INTO ERRORLOG(Id, entity, date_of_occ, errorMessage) values (l_n_nextID, l_v_tablename ,sysdate, l_v_errorMessage );
-		COMMIT;
-
-END;
-/
 
 /*********************************************************************/
 /**

@@ -1,18 +1,4 @@
-/*********************************************************************/
-/**
-/** Table: WidmungsDomän
-/** Developer: Bauer,Dorr
-/** Description: Beinhält die Werte für die Domäne Widmung
-/**
-/**
-/*********************************************************************/
 
-CREATE TABLE WidmungsDomain ( 
-
-  WidmungKurz varchar(10) PRIMARY KEY , 
-  WidmungLang varchar(110) not null 
-
-);
 
 -- Werte
 Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('L'), UPPER('Ländliche Gebiete'));

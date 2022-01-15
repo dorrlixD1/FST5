@@ -166,24 +166,19 @@ CREATE TABLE ERRORLOG (
   errorMessage varchar(200) not null
 );
 
+
 /*********************************************************************/
 /**
-/** Table: CHANGELOG
+/** Table: WidmungsDomän
 /** Developer: Bauer,Dorr
-/** Description: Die Entität „ChangeLog“ stellt die Tabelle für die Änderungen. 
-/** Sämtliche Tansaktionsänderungen sind dieser Tabelle zu entnehmen.
+/** Description: Beinhält die Werte für die Domäne Widmung
+/**
 /**
 /*********************************************************************/
-CREATE TABLE CHANGELOG ( 
 
-  id number PRIMARY KEY, 
+CREATE TABLE WidmungsDomain ( 
 
-  action VARCHAR(10) CHECK( action IN ('Update','Delete')) not null, 
+  WidmungKurz varchar(10) PRIMARY KEY , 
+  WidmungLang varchar(110) not null 
 
-  entity varchar(50) not null, 
-
-  date_of_occ timestamp default current_timestamp not null, 
-
-  description varchar(200) 
-
-); 
+);

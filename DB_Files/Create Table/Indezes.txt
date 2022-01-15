@@ -28,14 +28,6 @@ CREATE  INDEX KGInd1 ON KG(PLZ_Code);
 CREATE  INDEX ErrorLogInd1 ON errorLog (entity);
 CREATE  INDEX ErrorLogInd2 ON errorLog (date_of_occ);
 
---------------------------------------------------------
---  DDL for Index for table CHANGELOG
---------------------------------------------------------
-CREATE  INDEX ChangeLogInd1 ON changeLog (action);
-CREATE  INDEX ChangeLogInd2 ON changeLog (entity);
-CREATE  INDEX ChangeLogInd3 ON changeLog (date_of_occ);
-
-
 
 
 
