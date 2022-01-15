@@ -1,0 +1,839 @@
+/*********************************************************************
+/**
+/**Function: f_nextID_n
+/** In: l_v_tablename_in–name der Tabelle in der die max(ID) gesucht wird
+/** Returns: next ID
+/**Developer: Bauer, Dorr
+/**Description: Funktion um die nächtse ID zu bestimmen
+/**
+/**********************************************************************/
+CREATE OR REPLACE
+FUNCTION f_nextID_n (l_v_tablename_in IN varchar2)
+RETURN number
+AS
+	l_n_nextID number := 0;
+	l_n_maxID number := 0;
+	l_n_helper number := 0;
+	l_n_errlogid number := 0;
+--x_idEmpty Exception;
+BEGIN
+	EXECUTE IMMEDIATE 'select max(id) from ' || l_v_tablename_in into l_n_maxID ;
+	l_n_nextID := l_n_maxID +1;
+	if l_n_maxID is NULL then
+		l_n_nextID := 1;
+		--RAISE x_idEmpty;
+	end if;
+	return l_n_nextID;
+
+EXCEPTION
+
+WHEN NO_DATA_FOUND THEN
+	RAISE_APPLICATION_ERROR(-20050,'Keine Daten gefunden');
+
+WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_nextID_n', sysdate, 'f_nextID_n() ERROR');
+	COMMIT;
+	RAISE_APPLICATION_ERROR(-20051,'f_nextID_n() ERROR');
+
+END;
+/
+
+
+
+/*********************************************************************
+/**
+/**Function: f_checkBoolean_n
+/** In: l_n_value_in Wert, der geprüft werden muss
+/** Returns: Yes / No (0,1)
+/**Developer: Bauer, Dorr
+/**Description: Prüft, ob ein mitgegebener Wert binär ist.
+/**
+/**********************************************************************/
+CREATE OR REPLACE
+FUNCTION f_checkBoolean_n (l_n_value_in IN number)
+RETURN number
+AS
+
+-- Konstanten
+n_TRUE number := 1;
+n_FALSE number := 0;
+
+BEGIN
+	
+	if LENGTH(l_n_value_in) = 1 
+		AND (l_n_value_in != n_TRUE
+		OR l_n_value_in != n_FALSE) THEN
+			return n_TRUE;
+	ELSE
+			return n_FALSE;
+	END IF;
+
+EXCEPTION
+
+WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_checkBoolean_n', sysdate, 'f_checkBoolean_n() ERROR');
+	COMMIT;
+	RAISE_APPLICATION_ERROR(-20051,'f_checkBoolean_n() ERROR');
+
+END;
+/
+
+/*********************************************************************
+/**
+/**Function: f_Check_Existing_Rec
+/** In: 
+/** Returns: Yes / No (0,1)
+/**Developer: Bauer, Dorr
+/**Description: Prüft, ob es bereits einen Eintrag zu einem Value X in der Tabelle Y bei einer Spalte Z gibt.
+/**
+/**********************************************************************/
+CREATE or REPLACE
+FUNCTION f_Check_Existing_Rec (l_v_tableName in varchar, l_v_columnName in varchar, l_v_columnValue in varchar)
+RETURN NUMBER
+IS
+	
+	-- Constants
+	n_TRUE number := 1;
+	n_FALSE number := 0;
+	
+	-- Locals
+	l_n_RecCounter number;
+	v_sql varchar2(200) := 'select COUNT(' || l_v_columnName || ') FROM ' || l_v_tableName ||
+	' WHERE ' || l_v_columnName || '='|| '''' || UPPER(l_v_columnValue) || '''';
+
+BEGIN
+	
+	
+	EXECUTE IMMEDIATE v_sql INTO l_n_RecCounter;
+
+	if l_n_RecCounter > 0 THEN
+		return n_TRUE;
+	else
+		return n_FALSE;
+	END IF;
+	
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+	RAISE_APPLICATION_ERROR(-20050,'Keine Daten gefunden');
+	
+WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Check_Existing_Rec', sysdate, 'f_Check_Existing_Rec() ERROR');
+	COMMIT;
+	RAISE_APPLICATION_ERROR(-20051,'f_Check_Existing_Rec() ERROR');
+		 	
+END;
+/
+
+
+/*********************************************************************
+/**
+/**Function: f_Insert_ErwArt
+/** In: 
+/** Returns: the ID of the record
+/**Developer: Bauer, Dorr
+/**Description: Prüft, ob eine ErwArt bereits in der DB ist, wenn nicht
+/** wird diese angelegt. In beiden Fällen wird eine Neue oder eine bereits 
+/** existierende ID geliefert.
+/**
+/**********************************************************************/
+CREATE or REPLACE
+FUNCTION f_Insert_ErwArt (l_v_ErwArt in varchar)
+RETURN NUMBER
+IS
+
+	-- Constants
+	n_TRUE number := 1;
+	
+	-- Locals
+	l_n_nextID number;
+	l_n_currentID number;
+
+BEGIN
+
+	-- Prüfung, ob die Zuordnung bereits existiert
+	if f_Check_Existing_Rec('ErwArt', 'ErwArt' , UPPER(l_v_ErwArt)) = n_TRUE THEN
+		
+		SELECT ID INTO l_n_currentID FROM ErwArt WHERE ErwArt = UPPER(l_v_ErwArt);
+		RETURN l_n_currentID;
+	
+	ELSE
+	
+		l_n_nextID := f_nextID_n('ErwArt');
+				Insert into ErwArt(Id,ErwArt) values (l_n_nextID, UPPER(l_v_ErwArt));
+		COMMIT;
+		RETURN l_n_nextID;
+	
+	END IF;
+
+EXCEPTION
+
+	WHEN OTHERS THEN
+		Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Insert_ErwArt', sysdate, 'f_Insert_ErwArt() ERROR');
+		COMMIT;
+		RAISE_APPLICATION_ERROR(-20051,'f_Insert_ErwArt() ERROR');
+	
+END;
+/
+
+/*********************************************************************
+/**
+/**Function: f_Insert_Zuordnung
+/** In: 
+/** Returns: the ID of the record 
+/**Developer: Bauer, Dorr
+/**Description: Prüft, ob eine Zuordnung bereits in der DB ist, wenn nicht
+/** wird diese angelegt. In beiden Fällen wird eine Neue oder eine bereits 
+/** existierende ID geliefert.
+/**
+/**********************************************************************/
+CREATE or REPLACE
+FUNCTION f_Insert_Zuordnung (l_v_Zuordnung in varchar)
+RETURN NUMBER
+IS
+	
+	-- Constants
+	n_TRUE number := 1;
+	
+	-- Locals
+	l_n_nextID number;
+	l_n_currentID number;
+	
+BEGIN
+	
+	-- Prüfung, ob die Zuordnung bereits existiert
+	if f_Check_Existing_Rec('Zuordnung', 'Zuordnung', UPPER(l_v_Zuordnung) ) = n_TRUE THEN
+		
+		SELECT ID INTO l_n_currentID from Zuordnung WHERE Zuordnung = UPPER(l_v_Zuordnung);
+		RETURN l_n_currentID;
+
+	ELSE
+	
+		l_n_nextID := f_nextID_n('Zuordnung');
+		Insert into Zuordnung(Id, Zuordnung) values (l_n_nextID,UPPER(l_v_Zuordnung));
+		COMMIT;
+		RETURN l_n_nextID;
+	
+	END IF; 
+
+EXCEPTION
+
+WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Insert_Zuordnung', sysdate, 'f_Insert_Zuordnung() ERROR');
+	COMMIT;
+	RAISE_APPLICATION_ERROR(-20051,'f_Insert_Zuordnung() ERROR');
+		
+END;
+/
+
+
+
+
+/*********************************************************************
+/**
+/**Function: f_Insert_Widmung
+/** In: 
+/** Returns: the ID of the record 
+/**Developer: Bauer, Dorr
+/**Description: Prüft, ob eine Zuordnung bereits in der DB ist, wenn nicht
+/** wird diese angelegt. In beiden Fällen wird eine Neue oder eine bereits 
+/** existierende ID geliefert.
+/**
+/**********************************************************************/
+CREATE or REPLACE
+FUNCTION f_Insert_Widmung (l_v_WidmungKurz in varchar)
+RETURN NUMBER
+IS
+	-- Constants
+	n_TRUE number := 1;
+
+	-- Locals
+	l_n_nextID number;
+	l_n_currentID number;
+	l_v_WidmungLang varchar(250);
+
+	CURSOR GET_Widmung IS SELECT * FROM WidmungsDomain;
+	vResult GET_Widmung%ROWTYPE;
+
+BEGIN
+
+	if f_Check_Existing_Rec('Widmung','WidmungKurz', UPPER(l_v_WidmungKurz) ) = n_TRUE THEN
+
+		SELECT ID INTO l_n_currentID from Widmung WHERE WidmungKurz = UPPER(l_v_WidmungKurz);
+		RETURN l_n_currentID;
+
+	ELSE
+
+		-- CURSOR
+		FOR vResult IN Get_Widmung
+		LOOP
+	
+			IF INSTR(UPPER(l_v_WidmungKurz), vResult.WidmungKurz) != 0 THEN
+				l_v_WidmungLang := l_v_WidmungLang || ' ; ' || vResult.WidmungLang;
+			END IF;
+		
+		END LOOP;
+
+		l_n_nextID := f_nextID_n('Widmung');
+		Insert into Widmung(Id, WidmungKurz, WidmungLang)
+		values (l_n_nextID,UPPER(l_v_WidmungKurz), l_v_WidmungLang);
+	
+		RETURN l_n_nextID;
+	
+	END IF;
+	
+EXCEPTION
+
+WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Insert_Widmung', sysdate, 'f_Insert_Widmung() ERROR');
+	COMMIT;
+	RAISE_APPLICATION_ERROR(-20051,'f_Insert_Widmung() ERROR');
+		
+END;
+/
+
+
+
+/*********************************************************************
+/**
+/**Function: f_Insert_Adresse
+/** In: 
+/** Returns: the ID of the record 
+/**Developer: Bauer, Dorr
+/**Description: Prüft, ob eine Adresse bereits in der DB ist, wenn nicht
+/** wird diese angelegt. In beiden Fällen wird eine Neue oder eine bereits 
+/** existierende ID geliefert.
+/**
+/**********************************************************************/
+CREATE or REPLACE
+FUNCTION f_Insert_Adresse (l_n_KG_Code in Number, l_v_Strasse in varchar, l_v_Orientierungsnummer in varchar)
+RETURN NUMBER
+IS
+
+	-- Constants
+	n_TRUE number := 1;
+	
+	-- locals
+	l_n_nextID number;
+	l_n_currentID number;
+	l_n_rec number;
+
+BEGIN
+
+	SELECT COUNT(ID) INTO l_n_rec FROM Adresse
+		WHERE KG_Code = l_n_KG_Code
+			AND Strasse = UPPER(l_v_Strasse)
+			AND Orientierungsnummer = UPPER(l_v_Orientierungsnummer);
+
+	IF l_n_rec = 0 THEN
+			
+		l_n_nextID := f_nextID_n('Adresse');
+		Insert into Adresse(Id, KG_Code, Strasse, Orientierungsnummer)
+		values (l_n_nextID, l_n_KG_Code, UPPER(l_v_Strasse), UPPER(l_v_Orientierungsnummer));
+		RETURN l_n_nextID;
+
+	ELSE
+	
+		select ID INTO l_n_currentID FROM Adresse
+		WHERE KG_Code = l_n_KG_Code
+			AND Strasse = UPPER(l_v_Strasse)
+			AND Orientierungsnummer = UPPER(l_v_Orientierungsnummer);
+			
+		RETURN l_n_currentID;
+		
+	END IF;
+
+EXCEPTION
+
+WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Insert_Adresse', sysdate, 'f_Insert_Adresse() ERROR');
+	COMMIT;
+	RAISE_APPLICATION_ERROR(-20051,'f_Insert_Adresse() ERROR');
+			
+END;
+/
+
+
+/*********************************************************************
+/**
+/**Function: f_Insert_KG
+/** In: 
+/** Returns: the ID of the record 
+/**Developer: Bauer, Dorr
+/**Description: Prüft, ob eine KG bereits in der DB ist, wenn nicht
+/** wird diese angelegt. In beiden Fällen wird eine Neue oder eine bereits 
+/** existierende ID geliefert.
+/**
+/**********************************************************************/
+CREATE or REPLACE
+FUNCTION f_Insert_KG (l_n_KG_Code in Number, l_v_Katastralgemeinde in varchar,l_n_PLZ_Code in number)
+RETURN NUMBER
+IS
+	l_n_exists number;
+	n_TRUE number := 1;
+	n_FALSE number := 0;
+BEGIN
+
+	l_n_exists := f_Check_Existing_Rec('KG', 'KG_Code', l_n_KG_Code);
+
+	IF l_n_exists = 0 then
+		l_n_exists := f_Check_Existing_Rec('PLZ', 'PLZ_Code', l_n_PLZ_Code);
+
+		IF l_n_exists != 0 THEN
+			Insert into KG(KG_Code, Katastralgemeinde, PLZ_Code)
+				values (l_n_KG_Code, UPPER(l_v_Katastralgemeinde), l_n_PLZ_Code);
+			RETURN n_TRUE;
+		ELSE
+			RETURN n_FALSE;
+		END IF;
+		
+	ELSE
+	
+		RETURN n_TRUE;
+		
+	END IF;
+
+EXCEPTION
+
+WHEN OTHERS THEN
+	Insert into ERRORLOG (id,entity,date_of_occ,errormessage) values (f_nextID_n('ERRORLOG'),'f_Insert_KG', sysdate, 'f_Insert_KG() ERROR');
+	COMMIT;
+	RAISE_APPLICATION_ERROR(-20051,'f_Insert_KG() ERROR');
+		
+END;
+/
+
+/*********************************************************************
+/** Procedure: sp_Insert_ErrorLogEntry
+/** Developer: Dorr
+/** Description: Erstellt einen Eintrag im Errorlog.
+/**
+/**********************************************************************/
+CREATE or REPLACE
+PROCEDURE sp_Insert_ErrorLogEntry (l_v_tablename in varchar, l_v_errorMessage in varchar)
+IS
+	
+	-- locals
+	l_n_nextID number;
+
+BEGIN
+
+		l_n_nextID := f_nextID_n('ERRORLOG'); 
+		INSERT INTO ERRORLOG(Id, entity, date_of_occ, errorMessage) values (l_n_nextID, l_v_tablename ,sysdate, l_v_errorMessage );
+		COMMIT;
+
+END;
+/
+
+/*********************************************************************/
+/**
+/** Procedure:  sp_INSERT_LIEGREC
+/** Out: 
+/** In: 
+/** In: 
+/** Developer: Dorr, Bauer
+/** Description:
+/**
+/*********************************************************************/
+
+CREATE OR REPLACE 
+PROCEDURE sp_INSERT_LIEGREC (l_n_KG_Code_i in number, l_v_Katastralgemeinde_i in varchar, l_n_EZ_i in number, l_n_PLZ_Code_i in number,
+l_v_straße_i in varchar, l_v_Orientierungsnummer_in in varchar, l_v_Grundstuecksnummer_i in varchar, l_n_Grundstuecksflaeche_i in number, 
+l_v_ErwArt_i in varchar, l_d_ErwDatum_i in date, l_v_Widmung_i in varchar, l_n_Schutzzone_i in number, l_n_Wohnzone_i in number, l_n_OEZ_i in number,
+l_n_Bausperre_i in number, l_d_BausperreBis_i in date, l_v_Zuordnung_i in varchar, l_n_Geschoße_i in number, l_n_parzelliert_i in number, 
+l_d_Baujahr_i in number, l_v_Tagebuchzahl_i in varchar, l_n_Kaufpreis_i in decimal,  
+l_n_Baureifgest_i in number, l_n_Baurecht_i in number)
+
+AS
+
+	-- Constants
+	n_TRUE number := 1;
+	n_AKTIV number := 1;
+	n_INAKTIV number := 0;
+
+	-- Exceptions
+	x_parameter_fehler exception;
+	x_parameter_fehler_null exception;
+	x_insert_err_KG	exception;
+	x_insert_err_ErwArt	exception;
+	x_insert_err_Zuordnung	exception;
+	x_insert_err_Widmung exception;
+	x_insert_err_Adresse exception;
+
+	-- Locals
+	n_propCounter number;
+	n_erwArtID number;
+	n_widmungID number;
+	n_adresseID number;
+	n_zuordnungID number;
+	n_propertyID number;
+	n_ErrorLogID number;
+	n_BOL_Aktiv	number := 0;
+	
+Begin
+
+-- Variable Check
+
+		-- Prüfung auf NULL
+	if l_v_Katastralgemeinde_i							  IS NULL
+		OR l_v_Zuordnung_i											IS NULL
+		OR l_v_Tagebuchzahl_i										IS NULL
+		OR l_n_Kaufpreis_i											IS NULL
+		OR l_n_KG_Code_i												IS NULL
+		OR l_n_EZ_i															IS NULL
+		OR l_n_PLZ_Code_i 											IS NULL
+		OR l_n_Grundstuecksflaeche_i						IS NULL
+		OR l_n_Bausperre_i											IS NULL
+		OR l_v_Widmung_i												IS NULL
+		OR l_n_Schutzzone_i											IS NULL
+		OR l_n_Wohnzone_i												IS NULL
+		OR l_n_OEZ_i														IS NULL
+		OR l_n_parzelliert_i										IS NULL
+		OR l_n_Baureifgest_i										IS NULL
+		OR l_n_Baurecht_i												IS NULL
+		OR l_v_Tagebuchzahl_i										IS NULL THEN
+			RAISE x_parameter_fehler_null;
+	END IF;	
+		
+
+	-- Logical Parameter Check
+	if LENGTH(l_n_KG_Code_i) 									!= 4 
+		OR LENGTH(l_v_Katastralgemeinde_i) 			> 50
+		OR LENGTH(l_n_PLZ_Code_i) 							!=  4
+		OR LENGTH(l_v_Grundstuecksnummer_i) 		> 10
+		OR f_checkBoolean_n(l_n_Schutzzone_i) 	!= n_TRUE
+		OR f_checkBoolean_n(l_n_Wohnzone_i) 		!= n_TRUE
+		OR f_checkBoolean_n(l_n_OEZ_i) 					!= n_TRUE
+		OR f_checkBoolean_n(l_n_Bausperre_i) 		!= n_TRUE
+		OR f_checkBoolean_n(l_n_parzelliert_i)  != n_TRUE
+		OR f_checkBoolean_n(l_n_Baureifgest_i)  != n_TRUE
+		OR f_checkBoolean_n(l_n_Baurecht_i)     != n_TRUE	THEN
+		RAISE x_parameter_fehler;
+	END IF;
+
+-- Check if the Property is already existing, if yes then add history
+
+	select Count(l.Id) INTO n_propCounter FROM Liegenschaft l
+	join Adresse a on a.id = l.adresse_Id
+		where l.EZ			 = l_n_EZ_i 
+		AND l.GSTNR 		 = l_v_Grundstuecksnummer_i
+		AND a.KG_Code    = l_n_KG_Code_i
+		AND l.ErwDatum   > l_d_ErwDatum_i;
+	
+  -- Wenn der Zähler größer 1 ist, dann wird der Datensatz im Zugriff auf inaktiv gesetzt
+	if n_propCounter > 0 then	
+		
+		n_BOL_Aktiv := n_INAKTIV;
+
+	else	
+			
+		UPDATE (select * FROM Liegenschaft l 
+						join Adresse a on a.id = l.adresse_Id 
+						where l.EZ = l_n_EZ_i 
+						AND a.KG_Code = l_n_KG_Code_i 
+						AND l.GSTNR = l_v_Grundstuecksnummer_i 
+						AND l.BOL_AKTIV = n_AKTIV)
+		SET BOL_AKTIV = n_INAKTIV;
+		
+		n_BOL_Aktiv := n_AKTIV;
+			
+	end if;
+
+	
+-- Insert of the values
+
+	-- Insert new rec or fetch existing ID Table : ErwArt
+	n_erwArtID := f_Insert_ErwArt (l_v_ErwArt_i);
+	
+	if n_erwArtID = 0 THEN
+		raise x_insert_err_ErwArt;
+	end if;
+	
+	-- Insert new rec or fetch existing ID Table : Zuordnung
+	n_zuordnungID := f_Insert_Zuordnung (l_v_Zuordnung_i);
+	
+	if n_zuordnungID = 0 then
+		raise x_insert_err_Zuordnung;
+	end if;
+		
+	-- Insert new rec or catch existing ID Table : Widmung
+	n_widmungID := f_Insert_Widmung (l_v_Widmung_i);
+	
+	if n_widmungID = 0 then
+		raise x_insert_err_Widmung;
+	end if; 
+	
+	-- Insert new rec or fetch existing ID Table : KG (1 success, 0 failure)
+	if f_Insert_KG(l_n_KG_Code_i, l_v_Katastralgemeinde_i , l_n_PLZ_Code_i) != n_TRUE THEN
+		RAISE x_insert_err_KG;
+	END IF;
+	
+	-- Insert new rec or fetch existing ID Table : Adresse
+	n_adresseID := f_Insert_Adresse (l_n_KG_Code_i, l_v_straße_i, l_v_Orientierungsnummer_in);
+	
+	if n_adresseID = 0 then
+		raise x_insert_err_Adresse;
+	end if; 
+
+-- Insert new Property
+	n_propertyID := f_nextID_n('Liegenschaft');
+	
+	Insert into Liegenschaft(Id, Adresse_Id, GstNr, EZ, Geschosse, ErwArt_Id, ErwDatum, GstFl, Parzelliert, 
+		Zuordnung_Id, Widmung_Id, Baujahr, Kaufpreis, Tagebuchzahl, Schutzzone, Wohnzone, oeZ, Bausperre, BausperreBis, BAUREIFGEST, Baurecht, BOL_AKTIV)
+		values (n_propertyID,n_adresseID, UPPER(l_v_Grundstuecksnummer_i), l_n_EZ_i, l_n_Geschoße_i, n_erwArtID, l_d_ErwDatum_i, l_n_Grundstuecksflaeche_i,
+		l_n_parzelliert_i, n_zuordnungID, n_widmungID, l_d_Baujahr_i, l_n_Kaufpreis_i, l_v_Tagebuchzahl_i, l_n_Schutzzone_i, l_n_Wohnzone_i, l_n_OEZ_i, l_n_Bausperre_i, l_d_BausperreBis_i,   
+		l_n_Baureifgest_i,l_n_Baurecht_i, n_BOL_Aktiv ); 
+		
+	COMMIT;
+	
+-- Exception Handling
+Exception
+
+	When x_parameter_fehler_null THEN
+	  sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; PARAMETER FEHLER! Mindestens ein Parameterwert ist NULL!! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+		RAISE_APPLICATION_ERROR(-20001, 'ERR; PARAMETER FEHLER! Mindestens ein Parameterwert ist NULL!');
+		
+	when x_parameter_fehler THEN
+	  sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; PARAMETER FEHLER! Datentyp oder definierte Parameterlänge nicht eingehalten!! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+		RAISE_APPLICATION_ERROR(-20002, 'ERR; PARAMETER FEHLER! Datentyp oder definierte Parameterlänge nicht eingehalten!');
+		
+	When x_insert_err_KG THEN
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des KG-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
+		RAISE_APPLICATION_ERROR(-20004, 'ERR; Bei Anlage des KG-Satzes!');
+		
+	when x_insert_err_ErwArt THEN
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des ErwArt-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
+		RAISE_APPLICATION_ERROR(-20005, 'ERR; Bei Anlage des ErwArt-Satzes!');
+		
+	when x_insert_err_Zuordnung THEN
+	  sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des Zuordnungs-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM); 
+		RAISE_APPLICATION_ERROR(-20006, 'ERR; Bei Anlage des Zuordnungs-Satzes!');
+		
+	when x_insert_err_Widmung ThEN
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des Widmungs-Satzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);       
+		RAISE_APPLICATION_ERROR(-20007, 'ERR; Bei Anlage des Widmungs-Satzes!');
+		
+	when x_insert_err_Adresse THEN
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', 'ERR; Bei Anlage des Adresssatzes! Anlage der Liegenschaft, EZ: ' || l_n_EZ_i || 'Katastralgemeide: ' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+		RAISE_APPLICATION_ERROR(-20008, 'ERR; Bei Anlage des Adresssatzes!');
+	
+		
+	When OTHERS THEN
+		sp_Insert_ErrorLogEntry('sp_INSERT_LIEGREC', ' EZ: ' || l_n_EZ_i || 'Katastralgemeide:' || l_n_KG_Code_i || ' ' || SQLCODE || ' ' || SQLERRM);
+		RAISE;
+	
+End;
+/
+
+set serveroutput on;
+
+declare
+
+begin
+sp_INSERT_LIEGREC(1100, 'Neuklappersdorf' , 1002, 1030, 'La Viva Re Straße 45', '3a', '5665', 1000, 
+'Kauf',  to_date('2023-04-29', 'YYYY-MM-DD'), 'WIGBFOGL', 0, 1, 0, 0, CURRENT_TIMESTAMP, 'Einfamilienhaus', 4, 0, 2012, '6037/59',2006100.45, 0, 0);
+
+end;
+/
+
+
+/*********************************************************************/
+/**
+/** Procedure:  sp_READ_LIEG_HISTORY
+/** Out: SYS-REFCURSOR
+/** In:  KG_CODE, GstNr, EZ
+/** Developer: Dorr, Bauer
+/** Description:
+/**
+/*********************************************************************/
+
+CREATE OR REPLACE 
+PROCEDURE sp_READ_LIEG_HISTORY (l_n_KG_Code_i in number, l_v_Grundstuecksnummer_i in varchar, l_n_EZ_i in number, GET_LS_HISTORY OUT SYS_REFCURSOR)
+AS
+
+
+BEGIN
+
+Open GET_LS_HISTORY FOR
+
+SELECT l.ID, l.KAUFPREIS, e.ErwArt, l.ErwDatum, z.Zuordnung, w.WidmungLang FROM Liegenschaft l
+	join ErwArt e on e.ID = l.ErwArt_Id
+	join Zuordnung z on z.id = l.Zuordnung_Id
+	join Widmung w on w.id = l.Widmung_ID
+	join Adresse a on a.id = l.Adresse_Id
+	WHERE a.KG_Code = l_n_KG_Code_i
+		AND l.GstNr = l_v_Grundstuecksnummer_i
+		AND l.EZ = l_n_EZ_i
+		AND l.BOL_AKTIV = 0
+		ORDEr BY l.ERWDATUM DESC;
+
+
+END;
+/
+
+/*********************************************************************/
+/**
+/** Procedure:  sp_READ_LIEG_Details
+/** Out: Lieg_Rec
+/** In:  KG_CODE, GstNr, EZ
+/** Developer: Dorr, Bauer
+/** Description: Reading all Details of a Liegenschaft
+/**
+/*********************************************************************/
+
+CREATE OR REPLACE 
+PROCEDURE sp_READ_LIEG_HISTORY (l_n_Lieg_Id_i in number,  GET_LS_Details OUT SYS_REFCURSOR)
+AS
+
+BEGIN
+
+
+Open GET_LS_Details FOR
+
+SELECT * FROM Liegenschaft l
+	join ErwArt e on e.ID = l.ErwArt_Id
+	join Zuordnung z on z.id = l.Zuordnung_Id
+	join Widmung w on w.id = l.Widmung_ID
+	join Adresse a on a.id = l.Adresse_Id
+	join KG k on k.KG_Code = a.KG_Code
+	join PLZ p on p.plz_Code = k.PLZ_Code
+	WHERE l.id = l_n_Lieg_Id_i;
+
+END;
+/
+
+/*********************************************************************/
+/**
+/** Procedure:  sp_Delete_Lieg 
+/** Developer: Dorr, Bauer
+/** Description: Löscht alle Liegenschaftseinträge + dazugehörige Daten
+/**
+/*********************************************************************/
+
+Create or replace
+Procedure sp_Delete_Lieg 
+
+AS
+
+Begin
+
+	Delete from Liegenschaft;
+	Delete from Adresse;
+	Delete from KG;
+	Delete from Zuordnung;
+	Delete from Widmung;
+	Delete from ErwArt;
+
+	Commit;
+	
+	-- Excetption Handling
+	EXCEPTION
+
+	When others then
+
+			sp_Insert_ErrorLogEntry('SP_Delete_Lieg' ,'ERR; Löschen der LG-Daten nicht möglich! ' || SQLCODE || ' ' || SQLERRM);
+			Rollback;
+			RAISE;
+		
+End;
+/
+
+CREATE OR REPLACE PROCEDURE sp_Search_LIEGREC (l_n_PLZ_Code_i IN number, l_v_Katastralgemeinde_i IN varchar,l_v_Strasse_i IN varchar, l_v_WidmungLang_i In varchar,
+l_v_Zuordnung_i IN varchar, l_n_PreisVon_i in number, l_n_PreisBis_i in number, l_n_FlaecheVon_i in number, l_n_FlaecheBis_i in number, l_n_BaujahrVon_i in number, l_n_BaujahrBis_i in number,
+l_v_ErwDatumVon_i in varchar, l_v_ErwDatumBis_i in varchar, l_n_Bausperre_i in number, l_n_Baurecht_i in number, l_n_Schutzzone_i in number,
+l_n_Parzelliert_i in number, l_n_OeZwecke_i in number, l_n_Baureifgestaltung_i in number , Search_cur_out OUT SYS_REFCURSOR)
+
+AS
+
+--Constants
+n_k_TRUE number := 1;
+n_k_FALSE number := 0;
+v_k_Select_PLZ_Code varchar(100) := 'SearchView.PLZ_Code = ' || l_n_PLZ_Code_i;
+v_k_Select_Katastralgemeinde varchar(150) := 'SearchView.Katastralgemeinde =' || '''' || UPPER(l_v_Katastralgemeinde_i) || '''';
+v_k_Select_Strasse varchar(150) := 'SearchView.Strasse LIKE ' || '''' || UPPER(l_v_Strasse_i) || '%''' ;
+v_k_Select_Widmung varchar(350) := 'SearchView.WidmungLang LIKE ' || '''%' || UPPER(l_v_WidmungLang_i) || '%''';
+v_k_Select_Zuordnung varchar(150) := 'SearchView.Zuordnung = ' || '''' || UPPER(l_v_Zuordnung_i) || '''';
+v_k_Select_Preis varchar(150) := 'SearchView.Kaufpreis BETWEEN ' || l_n_PreisVon_i || ' AND ' || l_n_PreisBis_i;
+v_k_Select_Flaeche varchar(150) := 'SearchView.GstFl BETWEEN ' || l_n_FlaecheVon_i || ' AND ' || l_n_FlaecheBis_i;
+v_k_Select_Baujahr varchar(150) := 'SearchView.Baujahr BETWEEN ' || l_n_BaujahrVon_i || ' AND ' || l_n_BaujahrBis_i;
+v_k_Select_ErwDatum varchar(300) := 'SearchView.ErwDatum BETWEEN to_Date(''' || l_v_ErwDatumVon_i || ''', ''YYYY-MM-DD''' || ' AND ' || 'to_Date(''' || l_v_ErwDatumBis_i || ''', ''YYYY-MM-DD'')';
+v_k_Select_Bausperre varchar(150) := 'SearchView.Bausperre = ' || l_n_Bausperre_i;
+v_k_Select_Baurecht varchar(150) := 'SearchView.Baurecht = ' || l_n_Baurecht_i;
+v_k_Select_Schutzzone varchar(150) := 'SearchView.Schutzzone = ' || l_n_Schutzzone_i;
+v_k_Select_Parzelliert varchar(150) := 'SearchView.Parzelliert = ' || l_n_Parzelliert_i;
+v_k_Select_oeZ varchar(150) := 'SearchView.oeZ = ' || l_n_OeZwecke_i;
+v_k_Select_Baureifgest varchar(150) := 'SearchView.Baureifgest = ' || l_n_Baureifgestaltung_i;
+
+
+
+l_v_SelectString varchar2(3000) := ' select SearchView.id, SearchView.PLZ_Code, SearchView.Katastralgemeinde, SearchView.Strasse,
+SearchView.Orientierungsnummer, SearchView.Zuordnung, SearchView.WidmungLang, SearchView.Kaufpreis, SearchView.ERWDATUM, SearchView.Baujahr, SearchView.GSTFL from SearchView WHERE SearchView.BOL_AKTIV = 1 ';
+
+BEGIN
+
+	IF l_n_PLZ_Code_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_PLZ_Code;
+	END IF;
+
+	IF l_v_Katastralgemeinde_i IS NOT NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Katastralgemeinde;
+	END IF;
+
+	IF l_v_Strasse_i IS NOT NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Strasse;
+	END IF;
+
+	IF l_v_WidmungLang_i IS NOT NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Widmung;
+	END IF;
+
+	IF l_v_Zuordnung_i IS NOT NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Zuordnung;
+	END IF;
+
+	IF l_n_PreisVon_i > 0 AND l_n_PreisBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Preis;
+	END IF;
+
+	IF l_n_FlaecheVon_i > 0 AND l_n_FlaecheBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Flaeche;
+	END IF;
+
+	IF l_n_BaujahrVon_i > 0 AND l_n_BaujahrBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Baujahr;
+	END IF;
+
+	IF l_v_ErwDatumVon_i > NULL AND l_v_ErwDatumBis_i > NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_ErwDatum;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_Bausperre_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Bausperre;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_Baurecht_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Baurecht;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_Schutzzone_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Schutzzone;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_Parzelliert_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Parzelliert;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_OeZwecke_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_oeZ;
+	END IF;
+
+	IF f_checkBoolean_n(l_n_Baureifgestaltung_i) = n_k_TRUE Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Baureifgest;
+	END IF;
+
+--dbms_output.put_line(l_v_SelectString);
+
+Open Search_cur_out FOR
+ l_v_SelectString;
+
+END;
+/

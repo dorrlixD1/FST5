@@ -1,0 +1,372 @@
+/*********************************************************************/
+/**
+/** Table: Liegenschaft
+/** Developer: Bauer,Dorr
+/** Description: 
+/** Die Entität „Liegenschaft“ stellt die Tabelle für die Liegenschaften. 
+/** Ein Großteil der Informationen zu Liegenschaften sind in dieser Tabelle
+/** zu finden.
+/** Ausgenommen: Erwerbsart, Widmung, Zuordnung, Adresse, Katastralgemeinde, PLZ
+/**
+/*********************************************************************/
+Create TABLE Liegenschaft ( 
+
+  id number PRIMARY KEY, 
+  Adresse_Id number not null, 
+  GstNr varchar(10), 
+  Ez number not null,
+  Geschosse number,
+  ErwArt_Id number not null,
+  ErwDatum date,
+  GstFl number not null,
+  Parzelliert NUMBER(1) NOT NULL CHECK  (Parzelliert in (0,1)),
+  Zuordnung_id number not null,
+  Widmung_Id number not null,
+  Baujahr number,
+  Kaufpreis number(13,2) not null,
+  Tagebuchzahl varchar(10) not null,
+  Schutzzone NUMBER(1) NOT NULL CHECK  (Schutzzone in (0,1)),
+  Wohnzone NUMBER(1) NOT NULL CHECK  (Wohnzone in (0,1)),
+  oeZ NUMBER(1) NOT NULL CHECK  (oeZ in (0,1)),
+  Bausperre NUMBER(1) NOT NULL CHECK  (Bausperre in (0,1)),
+  BausperreBis date,
+  Baureifgest NUMBER(1) NOT NULL CHECK  (Baureifgest in (0,1)),
+  Baurecht NUMBER(1) NOT NULL CHECK  (Baurecht in (0,1)),
+  BOL_AKTIV NUMBER(1) NOT NULL CHECK  (BOL_AKTIV in (0,1))
+);
+
+/*********************************************************************/
+/**
+/** Table: ErwArt
+/** Developer: Bauer,Dorr
+/** Description: Die Entität "Erwerbsart" stellt alle Erwerbsarten, die
+/** vom Backend eingespielt werden dar. 
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE ErwArt ( 
+
+  id number PRIMARY KEY , 
+  ErwArt varchar(50) not null 
+
+);
+
+/*********************************************************************/
+/**
+/** Table: Widmung
+/** Developer: Bauer,Dorr
+/** Description: Die Entität "Widmung" enthält alle möglichen
+/** Widmungen, die zu einer Liegenschaft eingetragen werden können.
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE Widmung ( 
+
+  id number PRIMARY KEY , 
+
+  WidmungKurz varchar(15) not null, 
+  WidmungLang varchar(250)
+
+);
+
+
+/*********************************************************************/
+/**
+/** Table: Adresse
+/** Developer: Bauer,Dorr
+/** Description: Die Entität "Adresse" beinhält alle Adressen, die
+/** für eine Liegenschaft eingertagen wurden
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE Adresse ( 
+
+  id number PRIMARY KEY , 
+  KG_Code number not null, 
+  Strasse varchar(50),
+  Orientierungsnummer varchar(10)
+
+);
+
+
+/*********************************************************************/
+/**
+/** Table: KG
+/** Developer: Bauer,Dorr
+/** Description: Die Entiät "KG" (Katastralgemeinde) beinhält alle
+/** Katastralgemeinden, die zu diversen Liegenschaften verknüpft sind.
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE KG ( 
+
+  KG_Code number PRIMARY KEY ,  
+  Katastralgemeinde varchar(50),
+  PLZ_Code number not null
+
+);
+
+
+/*********************************************************************/
+/**
+/** Table: PLZ
+/** Developer: Bauer,Dorr
+/** Description: Die Entität "PLZ" beinhält alle
+/** Postleitzahlen, die zu diversen Liegenschaften verknüpft sind.
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE PLZ ( 
+
+  PLZ_Code number PRIMARY KEY ,  
+  PlzName varchar(50) not null
+
+);
+
+
+
+/*********************************************************************/
+/**
+/** Table: Zuordnung
+/** Developer: Bauer,Dorr
+/** Description: Die Entität "Zuodnung" beinhält die mögliche Zuordnungen, 
+/** die Liegenschaften zugeordnet werden können.
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE Zuordnung ( 
+
+  Id number PRIMARY KEY ,  
+  Zuordnung varchar(50) not null
+
+);
+
+/*********************************************************************/
+/**
+/** Table: ERRORLOG
+/** Developer: Bauer,Dorr
+/** Description: Die Entität „ErrorLog“ stellt die Tabelle für die Fehlerdaten. 
+/** Sämtliche Fehler sind dieser Tabelle zu entnehmen.
+/**
+/*********************************************************************/
+CREATE TABLE ERRORLOG ( 
+
+  id number PRIMARY KEY, 
+
+  entity varchar(50) not null, 
+
+  date_of_occ timestamp default current_timestamp not null, 
+
+  errorMessage varchar(200) not null
+);
+
+
+/*********************************************************************/
+/**
+/** Table: WidmungsDomän
+/** Developer: Bauer,Dorr
+/** Description: Beinhält die Werte für die Domäne Widmung
+/**
+/**
+/*********************************************************************/
+
+CREATE TABLE WidmungsDomain ( 
+
+  WidmungKurz varchar(10) PRIMARY KEY , 
+  WidmungLang varchar(110) not null 
+
+);
+
+
+--------------------------------------------------------
+--  Ref Constraints for Table Liegenschaft
+--------------------------------------------------------
+Alter Table Liegenschaft ADD FOREIGN KEY (Adresse_Id)
+	REFERENCES Adresse(Id) on delete set null enable;
+	
+Alter Table Liegenschaft ADD FOREIGN KEY (ErwArt_Id)
+	REFERENCES ErwArt(Id) on delete set null enable;
+	
+Alter Table Liegenschaft ADD FOREIGN KEY (Widmung_Id)
+	REFERENCES Widmung(Id) on delete set null enable;
+	
+Alter Table Liegenschaft ADD FOREIGN KEY (Zuordnung_Id)
+	REFERENCES Zuordnung(Id) on delete set null enable;
+
+--------------------------------------------------------
+--  Ref Constraints for Table Adresse
+--------------------------------------------------------
+	
+Alter Table Adresse ADD FOREIGN KEY (KG_Code)
+	REFERENCES KG(KG_Code) on delete set null enable;
+	
+--------------------------------------------------------
+--  Ref Constraints for Table KG
+--------------------------------------------------------
+	
+Alter Table KG ADD FOREIGN KEY (PLZ_Code)
+	REFERENCES PLZ(PLZ_Code) on delete set null enable;
+
+
+--------------------------------------------------------
+--  DDL for Index for table Liegenschaft
+--------------------------------------------------------
+CREATE  INDEX LiegInd1 ON Liegenschaft(Ez);
+CREATE  INDEX LiegInd3 ON Liegenschaft(Adresse_Id);
+
+--------------------------------------------------------
+--  DDL for Index for table Widmung
+--------------------------------------------------------
+CREATE  INDEX WidmungInd1 ON Widmung(WidmungKurz);
+
+--------------------------------------------------------
+--  DDL for Index for table Adresse
+--------------------------------------------------------
+CREATE  INDEX AdresseInd1 ON Adresse(Strasse);
+CREATE  INDEX AdresseInd2 ON Adresse(KG_Code);
+
+--------------------------------------------------------
+--  DDL for Index for table KG
+--------------------------------------------------------
+CREATE  INDEX KGInd1 ON KG(PLZ_Code);
+
+
+--------------------------------------------------------
+--  DDL for Index for table ERRORLOG
+--------------------------------------------------------
+CREATE  INDEX ErrorLogInd1 ON errorLog (entity);
+CREATE  INDEX ErrorLogInd2 ON errorLog (date_of_occ);
+
+/*********************************************************************/
+/**
+/** View: PlzView
+/** Developer: Dorr,Bauer
+/** Description: Liefert alle PLZ
+/**
+/*********************************************************************/
+
+CREATE or REPLACE VIEW PlzView
+as
+select plz_code from PLZ;
+
+/*********************************************************************/
+/**
+/** View: KGView
+/** Developer: Dorr,Bauer
+/** Description: Liefert alle Katastralgemeinden + PLZ
+/**
+/*********************************************************************/
+
+CREATE or REPLACE VIEW KGView
+as
+select Katastralgemeinde, plz_code from KG;
+
+/*********************************************************************/
+/**
+/** View: KGView
+/** Developer: Dorr,Bauer
+/** Description: Liefert alle Widmungen
+/**
+/*********************************************************************/
+
+CREATE or REPLACE VIEW WidmungenView
+as
+select Widmunglang from Widmungsdomain;
+
+/*********************************************************************/
+/**
+/** View: ZuordungView
+/** Developer: Dorr,Bauer
+/** Description: Liefert alle Widmungen
+/**
+/*********************************************************************/
+
+CREATE or REPLACE VIEW ZuordnungView
+as
+select distinct Zuordnung from Zuordnung;
+
+
+
+/*********************************************************************/
+/**
+/** View: SearchView
+/** Developer: Dorr,Bauer
+/** Description: View f. dyn Suche
+/**
+/*********************************************************************/
+CREATE or REPLACE VIEW SearchView
+as
+select l.* ,z.Zuordnung,  w.WidmungLang, w.WidmungKurz, k.KG_Code, a.Strasse, a.Orientierungsnummer,
+	k.Katastralgemeinde, k.PLZ_Code FROM Liegenschaft l
+	join Zuordnung z on z.id = l.Zuordnung_Id 
+	join Widmung w on w.id = l.Widmung_ID 
+	join Adresse a on a.id = l.Adresse_Id 
+	join KG k on k.KG_Code = a.KG_Code;
+
+
+Insert into PLZ(PLZ_Code, PlzName) values (1010, UPPER('Innere Stadt'));
+Insert into PLZ(PLZ_Code, PlzName) values (1020, UPPER('Leopoldstadt'));
+Insert into PLZ(PLZ_Code, PlzName) values (1030, UPPER('Landstrasse'));
+Insert into PLZ(PLZ_Code, PlzName) values (1040, UPPER('Wieden'));
+Insert into PLZ(PLZ_Code, PlzName) values (1050, UPPER('Margareten'));
+Insert into PLZ(PLZ_Code, PlzName) values (1060, UPPER('Mariahilf'));
+Insert into PLZ(PLZ_Code, PlzName) values (1070, UPPER('Neubau'));
+Insert into PLZ(PLZ_Code, PlzName) values (1080, UPPER('Josefstadt'));
+Insert into PLZ(PLZ_Code, PlzName) values (1090, UPPER('Alsergrund'));
+Insert into PLZ(PLZ_Code, PlzName) values (1100, UPPER('Favoriten'));
+Insert into PLZ(PLZ_Code, PlzName) values (1110, UPPER('Simmering'));
+Insert into PLZ(PLZ_Code, PlzName) values (1120, UPPER('Meidling'));
+Insert into PLZ(PLZ_Code, PlzName) values (1130, UPPER('Hietzing'));
+Insert into PLZ(PLZ_Code, PlzName) values (1140, UPPER('Penzing'));
+Insert into PLZ(PLZ_Code, PlzName) values (1150, UPPER('Rudolfsheim-Fünfhaus'));
+Insert into PLZ(PLZ_Code, PlzName) values (1160, UPPER('Ottakring'));
+Insert into PLZ(PLZ_Code, PlzName) values (1170, UPPER('Hernals'));
+Insert into PLZ(PLZ_Code, PlzName) values (1180, UPPER('Währing'));
+Insert into PLZ(PLZ_Code, PlzName) values (1190, UPPER('Döbling'));
+Insert into PLZ(PLZ_Code, PlzName) values (1200, UPPER('Brigittenau'));
+Insert into PLZ(PLZ_Code, PlzName) values (1210, UPPER('Floridsdorf'));
+Insert into PLZ(PLZ_Code, PlzName) values (1220, UPPER('Donaustadt'));
+Insert into PLZ(PLZ_Code, PlzName) values (1230, UPPER('Liesing'));
+
+
+-- Werte
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('L'), UPPER('Ländliche Gebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EPK'), UPPER('Erholungsgebiet - Parkanlagen'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EKL'), UPPER('Erholungsgebiet - Kleingartengebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EKLW'), UPPER('Erholungsgebiet - Kleingartengebiete für ganzjähriges Wohnen'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('ESP'), UPPER('Erholungsgebiet - Sport und Spielplätze'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EBD'), UPPER('Erholungsgebiet - Freibäder'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('EBH'), UPPER('Erholungsgebiet - Erholungsgebiete für Bevölerung und Grundflächen für Badehütten'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('Sww'), UPPER('Schutzgebiet - Wald und Wiesengürtel'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SWWL'), UPPER('Schutzgebiet - Landwirtschaftliche Nutzung'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SPK'), UPPER('Schutzgebiet - Parkschutzgebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('F'), UPPER('Friedhöfe'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SN'), UPPER('Sondernutzungsgebiete'));
+
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('VB'), UPPER('Verkehrsbänder'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('W'), UPPER('Wohngebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('WGV'), UPPER('Wohngebiete-Geschäftsviertel'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('WGF'), UPPER('wohngebiet-geförderter Wohnbau'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GS'), UPPER('Gartensiedlungsgebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GSGM'), UPPER('Gartensiedlungsgebiet-Gemeinschaftsanlage'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GB'), UPPER('Gemischte Baugebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GBGV'), UPPER('Gemischtes Baugebiet-Geschäftsviertel'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GBGF'), UPPER('Gemischtes Baugebiet - geförderter Wohnbau'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GBBG'), UPPER('Gemischtes Baugebiet - Betriebsbaugebiet'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('GBF'), UPPER('Gemischtes Baugebiet - Friedhofsbezogen'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('IG'), UPPER('Industriegebiete'));
+
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('IGBS'), UPPER('Industriegebiet mit bestimmter Verwendungs oder Nutzungsart'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('IGSI'), UPPER('Industriegebiet - Anwendungsbereich Richtlinie 2012/18/EU'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SO'), UPPER('Sondergebiete'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SOLL'), UPPER('Sondergebiete - Lagerplätze und Landeflächen'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SOLLBS'), UPPER('Sondergebiete mit bestimmten Lagerungen'));
+Insert into WidmungsDomain(WidmungKurz, WidmungLang) values (UPPER('SOMARKT'), UPPER('Sondergebiete - Sonstige Grundflächen für die Errichtung bestimmter Gebäude - (keine andere Widmung)'));
+
+Commit;
