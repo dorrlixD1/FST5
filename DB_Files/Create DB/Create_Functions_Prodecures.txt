@@ -790,15 +790,15 @@ BEGIN
 		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Zuordnung;
 	END IF;
 
-	IF l_n_PreisVon_i > 0 AND l_n_PreisBis_i > 0 Then
+	IF l_n_PreisVon_i >= 0 AND l_n_PreisBis_i > 0 Then
 		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Preis;
 	END IF;
 
-	IF l_n_FlaecheVon_i > 0 AND l_n_FlaecheBis_i > 0 Then
+	IF l_n_FlaecheVon_i >= 0 AND l_n_FlaecheBis_i > 0 Then
 		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Flaeche;
 	END IF;
 
-	IF l_n_BaujahrVon_i > 0 AND l_n_BaujahrBis_i > 0 Then
+	IF l_n_BaujahrVon_i >= 0 AND l_n_BaujahrBis_i > 0 Then
 		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Baujahr;
 	END IF;
 
