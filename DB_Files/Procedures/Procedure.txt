@@ -277,7 +277,7 @@ END;
 /*********************************************************************/
 
 CREATE OR REPLACE 
-PROCEDURE sp_READ_LIEG_HISTORY (l_n_Lieg_Id_i in number,  GET_LS_Details OUT SYS_REFCURSOR)
+PROCEDURE sp_READ_LIEG_DETAILS (l_n_Lieg_Id_i in number,  GET_LS_Details OUT SYS_REFCURSOR)
 AS
 
 BEGIN

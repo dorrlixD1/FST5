@@ -13,10 +13,14 @@ v_k_Select_Katastralgemeinde varchar(150) := 'SearchView.Katastralgemeinde =' ||
 v_k_Select_Strasse varchar(150) := 'SearchView.Strasse LIKE ' || '''' || UPPER(l_v_Strasse_i) || '%''' ;
 v_k_Select_Widmung varchar(350) := 'SearchView.WidmungLang LIKE ' || '''%' || UPPER(l_v_WidmungLang_i) || '%''';
 v_k_Select_Zuordnung varchar(150) := 'SearchView.Zuordnung = ' || '''' || UPPER(l_v_Zuordnung_i) || '''';
-v_k_Select_Preis varchar(150) := 'SearchView.Kaufpreis BETWEEN ' || l_n_PreisVon_i || ' AND ' || l_n_PreisBis_i;
+v_k_Select_PreisBoth varchar(150) := 'SearchView.Kaufpreis BETWEEN ' || l_n_PreisVon_i || ' AND ' || l_n_PreisBis_i;
+v_k_Select_PreisVon varchar(150) := 'SearchView.Kaufpreis >= ' || l_n_PreisVon_i;
+v_k_Select_PreisBis varchar(150) := 'SearchView.Kaufpreis <= ' || l_n_PreisBis_i;
 v_k_Select_Flaeche varchar(150) := 'SearchView.GstFl BETWEEN ' || l_n_FlaecheVon_i || ' AND ' || l_n_FlaecheBis_i;
 v_k_Select_Baujahr varchar(150) := 'SearchView.Baujahr BETWEEN ' || l_n_BaujahrVon_i || ' AND ' || l_n_BaujahrBis_i;
-v_k_Select_ErwDatum varchar(300) := 'SearchView.ErwDatum BETWEEN to_Date(''' || l_v_ErwDatumVon_i || ''', ''YYYY-MM-DD''' || ' AND ' || 'to_Date(''' || l_v_ErwDatumBis_i || ''', ''YYYY-MM-DD'')';
+v_k_Select_ErwDatumBoth varchar(300) := 'SearchView.ErwDatum BETWEEN to_Date(''' || l_v_ErwDatumVon_i || ''', ''YYYY-MM-DD'')' || ' AND ' || 'to_Date(''' || l_v_ErwDatumBis_i || ''', ''YYYY-MM-DD'')';
+v_k_Select_ErwDatumVon varchar(300) := 'SearchView.ErwDatum >= to_date(''' || l_v_ErwDatumVon_i || ''', ''YYYY-MM-DD'')';
+v_k_Select_ErwDatumBis varchar(300) := 'SearchView.ErwDatum <= to_date(''' || l_v_ErwDatumBis_i || ''', ''YYYY-MM-DD'')';
 v_k_Select_Bausperre varchar(150) := 'SearchView.Bausperre = ' || l_n_Bausperre_i;
 v_k_Select_Baurecht varchar(150) := 'SearchView.Baurecht = ' || l_n_Baurecht_i;
 v_k_Select_Schutzzone varchar(150) := 'SearchView.Schutzzone = ' || l_n_Schutzzone_i;
@@ -51,8 +55,17 @@ BEGIN
 		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Zuordnung;
 	END IF;
 
-	IF l_n_PreisVon_i >= 0 AND l_n_PreisBis_i > 0 Then
-		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Preis;
+	-- Kaufpreis Filter
+	IF l_n_PreisVon_i > 0 AND l_n_PreisBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_PreisBoth;
+	END IF;
+
+	IF l_n_PreisVon_i > 0 AND l_n_PreisBis_i = 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_PreisVon;
+	END IF;
+
+	IF l_n_PreisVon_i = 0 AND l_n_PreisBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_PreisBis;
 	END IF;
 
 	IF l_n_FlaecheVon_i >= 0 AND l_n_FlaecheBis_i > 0 Then
@@ -63,8 +76,17 @@ BEGIN
 		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Baujahr;
 	END IF;
 
-	IF l_v_ErwDatumVon_i > NULL AND l_v_ErwDatumBis_i > NULL Then
-		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_ErwDatum;
+	-- ErwDatum Filter
+	IF l_v_ErwDatumVon_i IS NOT NULL AND l_v_ErwDatumBis_i IS NOT NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_ErwDatumBoth;
+	END IF;
+	
+	IF l_v_ErwDatumVon_i IS NULL AND l_v_ErwDatumBis_i IS NOT NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_ErwDatumBis;
+	END IF;
+
+	IF l_v_ErwDatumVon_i IS NOT NULL AND l_v_ErwDatumBis_i IS NULL Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_ErwDatumVon; 
 	END IF;
 
 	IF f_checkBoolean_n(l_n_Bausperre_i) = n_k_TRUE Then
