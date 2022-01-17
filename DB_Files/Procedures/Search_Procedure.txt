@@ -16,8 +16,12 @@ v_k_Select_Zuordnung varchar(150) := 'SearchView.Zuordnung = ' || '''' || UPPER(
 v_k_Select_PreisBoth varchar(150) := 'SearchView.Kaufpreis BETWEEN ' || l_n_PreisVon_i || ' AND ' || l_n_PreisBis_i;
 v_k_Select_PreisVon varchar(150) := 'SearchView.Kaufpreis >= ' || l_n_PreisVon_i;
 v_k_Select_PreisBis varchar(150) := 'SearchView.Kaufpreis <= ' || l_n_PreisBis_i;
-v_k_Select_Flaeche varchar(150) := 'SearchView.GstFl BETWEEN ' || l_n_FlaecheVon_i || ' AND ' || l_n_FlaecheBis_i;
-v_k_Select_Baujahr varchar(150) := 'SearchView.Baujahr BETWEEN ' || l_n_BaujahrVon_i || ' AND ' || l_n_BaujahrBis_i;
+v_k_Select_FlaecheBoth varchar(150) := 'SearchView.GstFl BETWEEN ' || l_n_FlaecheVon_i || ' AND ' || l_n_FlaecheBis_i;
+v_k_Select_FlaecheVon varchar(150) := 'SearchView.GstFl >= ' || l_n_FlaecheVon_i;
+v_k_Select_FlaecheBis varchar(150) := 'SearchView.GstFl <= ' || l_n_FlaecheBis_i;
+v_k_Select_BaujahrBoth varchar(150) := 'SearchView.Baujahr BETWEEN ' || l_n_BaujahrVon_i || ' AND ' || l_n_BaujahrBis_i;
+v_k_Select_BaujahrVon varchar(150) := 'SearchView.Baujahr >= ' || l_n_BaujahrVon_i;
+v_k_Select_BaujahrBis varchar(150) := 'SearchView.Baujahr <= ' || l_n_BaujahrBis_i;
 v_k_Select_ErwDatumBoth varchar(300) := 'SearchView.ErwDatum BETWEEN to_Date(''' || l_v_ErwDatumVon_i || ''', ''YYYY-MM-DD'')' || ' AND ' || 'to_Date(''' || l_v_ErwDatumBis_i || ''', ''YYYY-MM-DD'')';
 v_k_Select_ErwDatumVon varchar(300) := 'SearchView.ErwDatum >= to_date(''' || l_v_ErwDatumVon_i || ''', ''YYYY-MM-DD'')';
 v_k_Select_ErwDatumBis varchar(300) := 'SearchView.ErwDatum <= to_date(''' || l_v_ErwDatumBis_i || ''', ''YYYY-MM-DD'')';
@@ -68,12 +72,31 @@ BEGIN
 		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_PreisBis;
 	END IF;
 
-	IF l_n_FlaecheVon_i >= 0 AND l_n_FlaecheBis_i > 0 Then
-		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Flaeche;
+
+	-- Filter Fläche
+	IF l_n_FlaecheVon_i > 0 AND l_n_FlaecheBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_FlaecheBoth;
+	END IF;
+	
+	IF l_n_FlaecheVon_i > 0 AND l_n_FlaecheBis_i = 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_FlaecheVon;
+	END IF;
+	
+	IF l_n_FlaecheVon_i = 0 AND l_n_FlaecheBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_FlaecheBis;
 	END IF;
 
-	IF l_n_BaujahrVon_i >= 0 AND l_n_BaujahrBis_i > 0 Then
-		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_Baujahr;
+	-- Filter Baujahr
+	IF l_n_BaujahrVon_i > 0 AND l_n_BaujahrBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_BaujahrBoth;
+	END IF;
+	
+	IF l_n_BaujahrVon_i > 0 AND l_n_BaujahrBis_i = 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_BaujahrVon;
+	END IF;
+	
+	IF l_n_BaujahrVon_i = 0 AND l_n_BaujahrBis_i > 0 Then
+		l_v_SelectString := l_v_SelectString || ' AND ' || v_k_Select_BaujahrBis;
 	END IF;
 
 	-- ErwDatum Filter
