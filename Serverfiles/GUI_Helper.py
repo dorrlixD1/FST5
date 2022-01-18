@@ -1,9 +1,12 @@
+from requests.models import Response
 from flask import Flask, request, jsonify
 import csv, urllib.request
 import sys
 from io import StringIO
 import time
+import datetime
 import requests
+import json
 import cx_Oracle
 
 cx_Oracle.init_oracle_client(r"/opt/oracle/instantclient_21_4/")
@@ -89,6 +92,128 @@ def getWidmung():
         i+=1
     cursor.close()
     return plzdict
+
+@app.route('/searchID')
+def getLiegHistory():
+    id = request.args.get("id")
+    cursor = conn.cursor()
+    refCursorVar = cursor.var(cx_Oracle.CURSOR)
+    cursor.callproc('sp_READ_LIEG_HISTORY', [id, refCursorVar])
+    print("Procedure called")
+    refCursor = refCursorVar.getvalue()
+    columns = [i[0] for i in refCursor.description]
+    new_list = []
+    for row in refCursor:
+        row_dict = dict()
+        for col in columns:
+            # Create a new dictionary with field names as the key, 
+            # row data as the value.
+            #if (isinstance(row_dict[col], datetime.datetime)):
+            #    row_dict[col]= row[columns.index(col)].strftime("%d.%m.%Y")
+            # Then add this dictionary to the new_list
+            #else:
+            row_dict[col] = str(row[columns.index(col)])
+
+        new_list.append(row_dict)
+    #print(new_list)
+
+    return json.dumps(new_list)
+
+
+@app.route('/search', methods=['POST'])
+def getLieg():
+    cursor = conn.cursor()
+    refCursorVar = cursor.var(cx_Oracle.CURSOR)
+
+    attributes = request.get_json(force=True)
+    
+    if (attributes["plz"] == ""):
+        attributes["plz"]=-1
+    if (attributes["kg"] == ""):
+        attributes["kg"]=None
+    if (attributes["straße"] == ""):
+        attributes["straße"]=None
+    if (attributes["widmLang"] == ""):
+        attributes["widmLang"]=None
+    if (attributes["zuordnung"] == ""):
+        attributes["zuordnung"]=None
+    if (attributes["preisVon"] == ""):
+        attributes["preisVon"]=0
+    if (attributes["preisBis"] == ""):
+        attributes["preisBis"]=0
+    if (attributes["flaecheVon"] == ""):
+        attributes["flaecheVon"]=0
+    if (attributes["flaecheBis"] == ""):
+        attributes["flaecheBis"]=0
+    if (attributes["baujahrVon"] == ""):
+        attributes["baujahrVon"]=0
+    if (attributes["baujahrBis"] == ""):
+        attributes["baujahrBis"]=0
+    if (attributes["erwDatumVon"] == ""):
+        attributes["erwDatumVon"]=None
+    if (attributes["erwDatumBis"] == ""):
+        attributes["erwDatumBis"]=None
+    if (attributes["bausperre"] == ""):
+        attributes["bausperre"]=-1
+    if (attributes["baurecht"] == ""):
+        attributes["baurecht"]=-1
+    if (attributes["schutzzone"] == ""):
+        attributes["schutzzone"]=-1
+    if (attributes["parzelliert"] == ""):
+        attributes["parzelliert"]=-1
+    if (attributes["oezwecke"] == ""):
+        attributes["oezwecke"]=-1
+    if (attributes["baureifgest"] == ""):
+        attributes["baureifgest"]=-1
+
+    print(attributes)
+#    print(f'sp_Search_LIEGREC(\'{attributes["plz"]}\',\'{attributes["kg"]}\',\'{attributes["straße"]}\',NULL,\'{attributes["zuordnung"]}\',\'{attributes["preisVon"]}\',\'{attributes["preisBis"]}\',\'{attributes["flaecheVon"]}\',\'{attributes["flaecheBis"]}\',\'{attributes["baujahrVon"]}\',\'{attributes["baujahrBis"]}\',\'{attributes["erwDatumVon"]}\',\'{attributes["erwDatumBis"]}\',\'{attributes["bausperre"]}\',\'{attributes["baurecht"]}\',\'{attributes["schutzzone"]}\',\'{attributes["parzelliert"]}\',\'{attributes["oezwecke"]}\',\'{attributes["baureifgest"]}\',{[refCursorVar]}); end;')
+#    cursor.execute(f'sp_Search_LIEGREC(\'{attributes["plz"]}\',\'{attributes["kg"]}\',\'{attributes["straße"]}\',NULL,\'{attributes["zuordnung"]}\',\'{attributes["preisVon"]}\',\'{attributes["preisBis"]}\',\'{attributes["flaecheVon"]}\',\'{attributes["flaecheBis"]}\',\'{attributes["baujahrVon"]}\',\'{attributes["baujahrBis"]}\',\'{attributes["erwDatumVon"]}\',\'{attributes["erwDatumBis"]}\',\'{attributes["bausperre"]}\',\'{attributes["baurecht"]}\',\'{attributes["schutzzone"]}\',\'{attributes["parzelliert"]}\',\'{attributes["oezwecke"]}\',\'{attributes["baureifgest"]}\',{[refCursorVar]}); end;')
+    cursor.callproc('sp_Search_LIEGREC', [attributes['plz'], attributes['kg'],attributes["straße"],attributes["widmLang"],attributes["zuordnung"],attributes["preisVon"],attributes["preisBis"],attributes["flaecheVon"],attributes["flaecheBis"],attributes["baujahrVon"],attributes["baujahrBis"],attributes["erwDatumVon"],attributes["erwDatumBis"],attributes["bausperre"],attributes["baurecht"],attributes["schutzzone"],attributes["parzelliert"],attributes["oezwecke"],attributes["baureifgest"], refCursorVar])
+    print("Procedure called")
+    refCursor = refCursorVar.getvalue()
+    columns = [i[0] for i in refCursor.description]
+    new_list = []
+    for row in refCursor:
+        row_dict = dict()
+        for col in columns:
+            # Create a new dictionary with field names as the key, 
+            # row data as the value.
+            #if (isinstance(row_dict[col], datetime.datetime)):
+            #    row_dict[col]= row[columns.index(col)].strftime("%d.%m.%Y")
+            # Then add this dictionary to the new_list
+            #else:
+            row_dict[col] = str(row[columns.index(col)])
+
+        new_list.append(row_dict)
+    #print(new_list)
+
+    return json.dumps(new_list)
+#    for res in refCursor:
+#        print(res)
+#    print(json.dumps(refCursor))
+#    cursor.execute(f"begin SP_Search_LIEGREC(\'"+ 
+#        ("-1" if attributes["plz"]=="" else attributes["plz"])+"\',\'"+
+#        (None if attributes["kg"]=="" else attributes["kg"])+"\',\'"+
+#        attributes["straße"]+"\',\'"+
+#        attributes["widmLang"]+"\',\'"+
+#        attributes["zuordnung"]+"\',\'"+
+#        attributes["preisVon"]+"\',\'"+
+#        attributes["preisBis"]+"\',\'"+
+#        attributes["flaecheVon"]+"\',\'"+
+#        attributes["flaecheBis"]+"\',"+
+#        attributes["baujahrVon"]+",\'"+
+#        attributes["baujahrBis"]+"\',\'"+
+#        ('0' if attributes["erwDatumVon"]=="FALSCH" else attributes["erwDatumVon"])+"\',\'"+
+#        ('0' if attributes["erwDatumBis"]=="FALSCH" else attributes["erwDatumBis"])+"\',\'"+
+#        ('0' if attributes["bausperre"]=="FALSCH" else attributes["bausperre"])+"\',\'"+
+#        ('0' if attributes["baurecht"]=="FALSCH" else attributes["baurecht"])+"\',"+
+#        attributes["schutzzone"]+",\'"+ #attributes["seit/bis"], Ist als Datum in DB eingetragen, wird zu selten befüllt oder nicht als DATE, wenn dann lieber varchar als Datentyp in DB eintragen
+#        attributes["parzelliert"]+"\',\'"+
+#        ('0' if attributes["oezwecke"] == "" else attributes["oezwecke"])+"\',\'"+
+#        ('1' if attributes["baureifgest"]=="J" else attributes["baureifgest"])+"\',\'"+refCursorVar+"\'); end;")
+    return "OK"
+    
 
 @app.route('/filterzuordnung')
 # ‘/’ URL is bound with hello_world() function.
